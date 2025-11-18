@@ -75,7 +75,7 @@ export default function Navbar({ onSearch }) {
           )}
 
           {isLoggedIn && (
-            <Link to="/heart" className="navbar-heart"> <Heart className="heart-icon" />Favourite</Link>
+            <Link to="/favourite" className="navbar-heart"> <Heart className="heart-icon" />Favourite</Link>
           )}
 
           {!isLoggedIn && (
