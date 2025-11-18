@@ -1,0 +1,608 @@
+.universal-filters-container {
+    margin-top: 35px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: rgb(39, 35, 35);
+    align-items: flex-start;
+}
+
+.universal-title {
+    font-size: 90px;
+    font-family: "Alex Brush";
+    font-weight: 700;
+    color: #7A0000;
+    margin-bottom: 20px;
+}
+
+.universal-filter-block {
+    padding-bottom: 30px;
+    border: none !important;
+    width: 100%;
+}
+
+.universal-filter-block h3 {
+    font-size: 23px;
+    font-weight: 700;
+    border-bottom: 1px solid #ffffff;
+    padding-bottom: 15px;
+    margin-bottom: 10px;
+    font-family: "Roboto", sans-serif;
+}
+
+.universal-filter-block ul {
+    line-height: 20px;
+    list-style: none;
+}
+
+.universal-filter-block li {
+    margin-bottom: 7px;
+}
+
+.universal-filter-block label {
+    font-family: "Roboto", sans-serif;
+    font-weight: 500;
+    font-size: 17px;
+    display: flex;
+    align-items: center;
+    padding-bottom: 3px;
+    gap: 10px;
+}
+
+.universal-filter-block input[type="radio"] {
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border: 1px solid #FFFFFF;
+    border-radius: 0px;
+    cursor: pointer;
+}
+
+.universal-filter-block input[type="radio"]:checked {
+    background-color: #7A0000;
+    border: #7A0000;
+}
+
+.universal-filter-block input[type="radio"]:hover {
+    border-color: #7A0000;
+}
+
+.universal-price-filter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.universal-price-filter input {
+    width: 65px;
+    height: 30px;
+    background: #222;
+    color: white;
+    border: 1px solid #444;
+    padding: 5px;
+    font-size: 13px;
+}
+
+.universal-price-ok {
+    background-color: #7A0000;
+    color: #fff;
+    border: none;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.universal-price-ok:hover {
+    background-color: #c00;
+}
+
+.universal-filter-toggle {
+   display: none;
+  background-color: #7a0000;
+  color: #fff;
+  border: none;
+  padding: 10px 25px;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-bottom: 20px;
+  transition: background 0.4s ease;
+}
+
+.universal-filter-toggle:hover {
+    background-color: #c00;
+}
+
+
+@media (max-width: 1400px) {
+    .universal-filters-container {
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+        gap: 60px;
+        width: 100%;
+        margin-top: 50px;
+    }
+
+    .universal-title {
+        font-size: 90px;
+        text-align: center;
+        width: 100%;
+        margin-bottom: 0px;
+    }
+
+    .universal-filters {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        width: 100%;
+        gap: 20px;
+    }
+
+    .universal-filter-block {
+        min-width: 220px ;
+        width: auto !important;
+    }
+
+    .universal-filter-block h3 {
+        font-size: 33px;
+        padding-bottom: 17px;
+        margin-bottom: 17px;
+    }
+
+    .universal-filter-block ul {
+        line-height: 25px;
+    }
+
+
+    .universal-filter-block label {
+        font-size: 21px;
+        gap: 12px;
+    }
+
+    .universal-filter-block input[type="radio"] {
+        width: 18px;
+        height: 18px;
+    }
+
+    .universal-price-filter {
+        gap: 20px;
+    }
+
+    .universal-price-filter input {
+        width: 70px;
+        height: 35px;
+        font-size: 17px;
+    }
+
+    .universal-price-ok {
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 1024px) {
+    .universal-filters {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        flex-wrap: nowrap;
+        width: 90%;
+        gap: 110px;
+    }
+
+    .universal-title {
+        font-size: 90px;
+        text-align: center;
+        width: 80%;
+        margin-bottom: 0px;
+    }
+
+    .universal-filter-block {
+        min-width: 142px;
+        width: auto !important;
+    }
+
+    .universal-filter-block h3 {
+        font-size: 33px;
+        padding-bottom: 17px;
+        margin-bottom: 17px;
+    }
+
+    .universal-filter-block ul {
+        line-height: 25px;
+    }
+
+    .universal-filter-block label {
+        font-size: 24px;
+        gap: 12px;
+    }
+
+    .universal-filter-block input[type="radio"] {
+        transform: scale(1.4);
+    }
+
+    .universal-price-filter {
+        gap: 10px;
+    }
+
+    .universal-price-filter input {
+        width: 70px;
+        height: 45px;
+        font-size: 25px;
+    }
+
+    .universal-price-ok {
+        padding: 10px 15px;
+        font-size: 20px;
+    }
+}
+
+@media (max-width: 900px) {
+    .universal-filter-toggle {
+        display: inline-block;
+        align-items: center;
+        width: 100%;
+        padding: 12px 25px;
+        margin-bottom: 50px;
+        margin-left: -50px;
+    }
+
+    .universal-title {
+        font-size: 95px;
+        text-align: center;
+        width: 78%;
+        margin-bottom: 0px;
+    }
+
+    .universal-filters {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        opacity: 0;
+        height: 0;
+        overflow: hidden;
+        transition: height 0.4s ease, opacity 0.3s ease;
+        gap: 30px;
+    }
+
+    .universal-filters.show {
+        height: auto;
+        opacity: 1;
+        margin-top: 0;
+    }
+
+    .universal-filter-block {
+        min-width: 200px;
+    }
+
+    .universal-filter-block h3 {
+        font-size: 33px;
+        padding-bottom: 15px;
+        margin-bottom: 17px;
+        display: block;
+        width: 400px;
+    }
+
+    .universal-filter-block ul {
+        line-height: 25px;
+        letter-spacing: 2px;
+    }
+
+    .universal-filter-block label {
+        font-size: 25px;
+        gap: 20px;
+    }
+
+    .universal-filter-block input[type="radio"] {
+        transform: scale(1.5);
+    }
+
+    .universal-price-filter {
+        gap: 15px;
+    }
+
+    .universal-price-filter input {
+        width: 72px;
+        height: 50px;
+        font-size: 25px;
+    }
+
+    .universal-price-ok {
+        padding: 10px 15px;
+        font-size: 20px;
+    }
+}
+
+@media (max-width: 600px) {
+    .universal-filter-toggle {
+        padding: 11px 20px;
+        font-size: 20px;
+        width: 100%;
+        margin-left: -10px;
+    }
+
+    .universal-title {
+        font-size: 85px;
+        text-align: center;
+        width: 93%;
+    }
+
+    .universal-filters.show {
+        height: auto;
+        opacity: 1;
+        margin-top: 0;
+    }
+
+    .universal-filter-block {
+        min-width: 200px;
+    }
+
+    .universal-filter-block h3 {
+        font-size: 33px;
+        padding-bottom: 15px;
+        margin-bottom: 17px;
+        display: block;
+        width: 300px;
+    }
+
+    .universal-filter-block ul {
+        line-height: 35px;
+        letter-spacing: 2px;
+    }
+
+    .universal-filter-block label {
+        font-size: 25px;
+        gap: 20px;
+    }
+
+    .universal-filter-block input[type="radio"] {
+        transform: scale(1.5);
+    }
+
+    .universal-price-filter {
+        gap: 15px;
+    }
+
+    .universal-price-filter input {
+        width: 75px;
+        height: 52px;
+        font-size: 26px;
+    }
+
+    .universal-price-ok {
+        padding: 12px 15px;
+        font-size: 21px;
+    }
+}
+
+@media (max-width: 500px) {
+    .universal-filter-toggle {
+        font-size: 20px;
+        width: 120%;
+        margin-left: -35px;
+    }
+
+    .universal-title {
+        font-size: 80px;
+        text-align: center;
+        width: 88%;
+        margin-bottom: 10px;
+    }
+
+    .universal-filters.show {
+        height: auto;
+        opacity: 1;
+        margin-top: 0;
+    }
+
+    .universal-filter-block {
+        min-width: 200px;
+    }
+
+    .universal-filter-block h3 {
+        font-size: 30px;
+        padding-bottom: 15px;
+        margin-bottom: 17px;
+        display: block;
+        width: 250px;
+        text-align: left;
+    }
+
+    .universal-filter-block ul {
+        line-height: 25px;
+        letter-spacing: 2px;
+    }
+
+    .universal-filter-block label {
+        font-size: 23px;
+        gap: 15px;
+    }
+
+    .universal-filter-block input[type="radio"] {
+        transform: scale(1.4);
+    }
+
+    .universal-price-filter {
+        gap: 15px;
+    }
+
+    .universal-price-filter input {
+        width: 70px;
+        height: 45px;
+        font-size: 26px;
+    }
+
+    .universal-price-ok {
+        padding: 10px 15px;
+        font-size: 20px;
+    }
+}
+
+@media (max-width: 420px) {
+    .universal-filter-toggle {
+        padding: 12px 22px;
+        font-size: 20px;
+        width: 120%;
+        margin-left: -35px;
+    }
+
+    .universal-title {
+        font-size: 80px;
+        text-align: center;
+        width: 90%;
+    }
+
+    .universal-filter-block h3 {
+        font-size: 30px;
+        padding-bottom: 15px;
+        margin-bottom: 17px;
+        display: block;
+        width: 200px;
+        text-align: left;
+    }
+
+    .universal-filter-block ul {
+        line-height: 20px;
+        letter-spacing: 2px;
+    }
+
+    .universal-filter-block label {
+        font-size: 20px;
+        gap: 20px;
+    }
+
+    .universal-filter-block input[type="radio"] {
+        transform: scale(1.4);
+    }
+
+    .universal-price-filter {
+        gap: 15px;
+    }
+
+    .universal-price-filter input {
+        width: 70px;
+        height: 50px;
+        font-size: 26px;
+    }
+
+    .universal-price-ok {
+        padding: 12px 12px;
+        font-size: 20px;
+    }
+}
+
+@media (max-width: 381px) {
+    .universal-filter-toggle {
+        padding: 9px 20px;
+        font-size: 18px;
+        width: 130%;
+        margin-left: -40px;
+    }
+
+    .universal-title {
+        margin-top: -20px;
+        font-size: 78px;
+        text-align: center;
+        width: 90%;
+    }
+
+    .universalfilter-block {
+        min-width: 90px;
+    }
+
+    .universal-filter-block h3 {
+        font-size: 23px;
+        padding-bottom: 5px;
+        margin-bottom: 10px;
+        display: block;
+        width: 200px;
+        text-align: left;
+    }
+
+    .universal-filter-block ul {
+        line-height: 18px;
+        letter-spacing: 2px;
+    }
+
+    .universal-filter-block label {
+        font-size: 14px;
+        gap: 12px;
+    }
+
+    .universal-filter-block input[type="radio"] {
+        transform: scale(1.2);
+    }
+
+    .universal-price-filter {
+        gap: 15px;
+    }
+
+    .universal-price-filter input {
+        width: 45px;
+        height: 30px;
+        font-size: 18px;
+    }
+
+    .universal-price-ok {
+        padding: 7px 14px;
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 360px) {
+    .universal-filter-toggle {
+        padding: 7px 22px;
+        font-size: 18px;
+        width: 120%;
+        margin-left: -30px;
+    }
+
+    .universal-title {
+        font-size: 75px;
+        text-align: center;
+        width: 85%;
+    }
+
+    .universal-filter-block h3 {
+        font-size: 24px;
+        padding-bottom: 5px;
+        margin-bottom: 10px;
+        display: block;
+        width: 170px;
+        text-align: left;
+    }
+
+    .universal-filter-block ul {
+        line-height: 16px;
+        letter-spacing: 2px;
+    }
+
+    .universal-filter-block label {
+        font-size: 16px;
+        gap: 10px;
+    }
+
+    .universal-filter-block input[type="radio"] {
+        transform: scale(1);
+    }
+
+    .universal-price-filter {
+        gap: 15px;
+    }
+
+    .universal-price-filter input {
+        width: 50px;
+        height: 35px;
+        font-size: 16px;
+    }
+
+    .universal-price-ok {
+        padding: 8px 10px;
+        font-size: 15px;
+    }
+}

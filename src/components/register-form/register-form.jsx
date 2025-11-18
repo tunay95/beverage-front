@@ -30,11 +30,11 @@ export default function RegisterForm() {
 
   return (
     <div className="register-form">
-      <form onSubmit={handleSubmit} className="form-container">
+      <form onSubmit={handleSubmit} className="register-form-container">
         <div className="register">Register</div>
-        {error && <div className="form-error-message">{error}</div>}
+        {error && <div className="register-form-error-message">{error}</div>}
         {successMessage && (
-          <div className="form-success-message">{successMessage}</div>
+          <div className="register-form-success-message">{successMessage}</div>
         )}
 
         <input
@@ -55,7 +55,7 @@ export default function RegisterForm() {
           placeholder="Şifrə"
           onChange={handleChange}
         />
-        <button type="submit" className="btn btn-white">
+        <button type="submit" className="register-btn-white">
           Qeydiyyat
         </button>
       </form>

@@ -128,43 +128,25 @@
   font-size: 13px;
 }
 
-@media(max-width: 1290px){
+@media(max-width: 1290px) {
   .product-details {
     padding: 60px 80px;
     gap: 160px;
   }
-  
+
   .product-left {
     height: 400px;
     width: 350px;
     padding-bottom: 40px;
   }
-  
+
   .product-left img {
     width: 300px;
     height: 430px;
   }
 }
 
-@media(max-width: 1150px){
-  .product-details {
-    padding: 60px 80px;
-    gap: 155px;
-  }
-  
-  .product-left {
-    height: 390px;
-    width: 340px;
-    padding-bottom: 40px;
-  }
-  
-  .product-left img {
-    width: 350px;
-    height: 400px;
-  }
-}
-
-@media (max-width: 1024px) {
+@media (max-width: 1150px) {
   .product-details {
     flex-direction: column;
     padding: 0px 40px;
@@ -187,5 +169,234 @@
 
   .product-info {
     padding-top: 20px;
+    padding-left: 50px;
+  }
+}
+
+@media (max-width: 850px) {
+  .product-details {
+    flex-direction: column;
+    padding: 0px 40px;
+    padding-bottom: 40px;
+    gap: 60px;
+  }
+
+  .product-left {
+    height: 100%;
+    width: 112%;
+    padding-top: 20px;
+    margin-left: -40px;
+    transform: none !important;
+  }
+
+  .product-left img {
+    width: 250px;
+    height: 320px;
+  }
+
+  .product-info {
+    padding-top: 20px;
+    padding-left: 50px;
+  }
+
+  .product-title {
+    font-size: 30px;
+  }
+
+  .product-meta {
+    font-size: 14px;
+  }
+
+  .product-price {
+    font-size: 25px;
+    margin-top: 10px;
+  }
+
+  .buy-row {
+    gap: 15px;
+    margin-top: 10px;
+  }
+
+  .buy-row input {
+    width: 60px;
+    font-size: 15px;
+    padding: 9px;
+  }
+
+  .buy-btn {
+    padding: 11px 25px;
+    font-size: 13px;
+  }
+
+  .product-stats {
+    gap: 18px 60px;
+    font-size: 14px;
+    margin-top: 20px;
+  }
+
+  .product-section {
+    margin-top: 37px;
+  }
+
+  .product-section h3 {
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+    font-size: 16px;
+  }
+
+  .product-section p {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 650px) {
+  .product-details {
+    flex-direction: column;
+    padding: 0px 40px;
+    padding-bottom: 40px;
+    gap: 60px;
+  }
+
+  .product-left {
+    height: 100%;
+    width: 115%;
+    padding-top: 20px;
+    margin-left: -40px;
+    transform: none !important;
+  }
+
+  .product-left img {
+    width: 250px;
+    height: 320px;
+  }
+
+  .product-info {
+    padding-top: 20px;
+    padding-left: 50px;
+  }
+
+  .product-title {
+    font-size: 30px;
+  }
+
+  .product-meta {
+    font-size: 14px;
+  }
+
+  .product-price {
+    font-size: 25px;
+    margin-top: 10px;
+  }
+
+  .buy-row {
+    gap: 15px;
+    margin-top: 10px;
+  }
+
+  .buy-row input {
+    width: 60px;
+    font-size: 15px;
+    padding: 9px;
+  }
+
+  .buy-btn {
+    padding: 11px 25px;
+    font-size: 13px;
+  }
+
+  .product-stats {
+    gap: 18px 60px;
+    font-size: 14px;
+    margin-top: 20px;
+  }
+
+  .product-section {
+    margin-top: 37px;
+  }
+
+  .product-section h3 {
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+    font-size: 16px;
+  }
+
+  .product-section p {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 460px) {
+  .product-details {
+    flex-direction: column;
+    padding: 0px 40px;
+    padding-bottom: 40px;
+    gap:  50px;
+  }
+
+  .product-left {
+    height: 100%;
+    width: 130%;
+    padding-top: 20px;
+    margin-left: -40px;
+    transform: none !important;
+  }
+
+  .product-left img {
+    width: 250px;
+    height: 250px;
+  }
+
+  .product-info {
+    padding-top: 0px;
+    padding-left: 0px;
+  }
+
+  .product-title {
+    font-size: 26px;
+  }
+
+  .product-meta {
+    font-size: 11px;
+  }
+
+  .product-price {
+    font-size: 22px;
+    margin-top: 0px;
+  }
+
+  .buy-row {
+    gap: 15px;
+    margin-top: 0px;
+  }
+
+  .buy-row input {
+    width: 60px;
+    font-size: 13px;
+    padding: 8px;
+  }
+
+  .buy-btn {
+    padding: 10px 25px;
+    font-size: 12px;
+  }
+
+  .product-stats {
+    gap: 15px 20px;
+    font-size: 11px;
+    margin-top: 20px;
+  }
+
+  .product-section {
+    margin-top: 30px;
+  }
+
+  .product-section h3 {
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+    font-size: 14px;
+  }
+
+  .product-section p {
+    font-size: 8px;
   }
 }

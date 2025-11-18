@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import "./login-form.css";
 
 export default function LoginForm() {
@@ -30,18 +30,20 @@ export default function LoginForm() {
       localStorage.setItem("currentUser", JSON.stringify(loginData));
       setSuccessMessage("Uğurla daxil oldunuz!");
       setTimeout(() => navigate("/"), 1500);
-    }
-    else {
+    } else {
       setError("Email və ya şifrə yanlışdır!");
     }
   };
 
   return (
     <div className="login-form">
-      <form onSubmit={handleSubmit} className="form-container">
+      <form onSubmit={handleSubmit} className="login-form-container">
         <div className="login">Login</div>
-        {error && <div   className="form-error-message">{error}   </div>}
-        {successMessage && (<div    className="form-success-message">{successMessage}   </div>)}
+
+        {error && <div className="login-form-error-message">{error}</div>}
+        {successMessage && (
+          <div className="login-form-success-message">{successMessage}</div>
+        )}
 
         <input
           type="email"
@@ -50,6 +52,7 @@ export default function LoginForm() {
           placeholder="Email daxil edin"
           required
         />
+
         <input
           type="password"
           value={password}
@@ -57,9 +60,17 @@ export default function LoginForm() {
           placeholder="Şifrə daxil edin"
           required
         />
-        <button type="submit" className="btn btn-white">
+
+        <button type="submit" className="login-btn-white">
           Daxil ol
         </button>
+
+        <div className="register-text">
+          Hesabın yoxdur?{" "}
+          <Link to="/auth/register" className="register-link">
+            Qeydiyyatdan keç
+          </Link>
+        </div>
       </form>
     </div>
   );

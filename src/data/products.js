@@ -6,6 +6,8 @@ const products = [
     name: "L'ERMITE HERMITAGE",
     category: "wine",
     price: 90000,
+    color: "Red",  
+    sweetness: "Dry",
     imageUrl: image,
     year: 2009,
     country: "ФРАНЦИЯ / HAUT-BRION",

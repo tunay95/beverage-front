@@ -1,20 +1,37 @@
 .login-form {
+  width: 100%;
+  height: 100vh;
+  background-image: url("../../assets/images/login.jpg");
+  background-size: cover;
+  background-position: top center;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.form-container {
-  background-color: #fafafa;
+.login-form::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  backdrop-filter: blur(11px);
+  background: rgba(0, 0, 0, 0.50);
+}
+
+.login-form-container {
+  background-color: #000000;
   border: 3px solid #7A0000;
   border-radius: 20px;
   padding: 40px 35px;
-  max-width: 420px;
+  width: 100%;
+  height: 60%;
+  max-width: 450px;
   display: flex;
-  gap: 20px;
+  flex-direction: column;
+  gap: 18px;
+  z-index: 2;
 }
 
-.form-container:hover {
+.login-form-container:hover {
   box-shadow: 0 0 40px rgba(122, 0, 0, 0.35);
 }
 
@@ -24,27 +41,58 @@
   font-size: 34px;
   font-weight: bold;
   text-align: center;
-  margin-bottom: 12px;
+  margin-bottom: 15px;
 }
 
-.form-container input {
+.register-text {
+  text-align: center;
+  margin-top: 5px;
+  font-size: 14px;
+  color: #ddd;
+}
+
+.register-link {
+  color: #7A0000;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.register-link:hover {
+  text-decoration: underline;
+  color: #c70000;
+}
+
+.login-form-container input {
+  padding: 12px 14px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  color: #333;
+  font-size: 15px;
   transition: border 0.3s, box-shadow 0.3s;
 }
 
-.btn.btn-white {
+.login-form-container input:focus {
+  border-color: #7A0000;
+  box-shadow: 0 0 10px rgba(122, 0, 0, 0.4);
+}
+
+.login-btn-white {
   font-size: 18px;
   font-weight: 600;
   padding: 12px 0;
-  border-radius: 8px;
   cursor: pointer;
+  background: #7A0000;
+  color: white;
+  border: none;
+  transition: background-color 0.3s, transform 0.2s;
 }
 
-.btn.btn-white:hover {
+.login-btn-white:hover {
   background-color: #a32c2c;
   transform: scale(1.03);
 }
 
-.form-error-message {
+.login-form-error-message {
   color: #a00000;
   background-color: #ffeaea;
   border: 1px solid #ffb3b3;
@@ -54,7 +102,7 @@
   text-align: center;
 }
 
-.form-success-message {
+.login-form-success-message {
   color: #046704;
   background-color: #e8f8e8;
   border: 1px solid #9cd39c;

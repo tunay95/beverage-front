@@ -347,11 +347,11 @@
 
 @media (max-width: 940px) {
   .slider {
-    height: 240px;
+    height: 230px;
   }
 
   .slide:nth-child(2) {
-    height: 240px;
+    height: 230px;
   }
 
   .slide {
@@ -371,19 +371,19 @@
 
   .banner-text h3,
   .content-right h3 {
-    font-size: 55px;
+    font-size: 52px;
     margin-bottom: 10px;
   }
 
   .banner-text h2,
   .content-right h2 {
-    font-size: 28px;
+    font-size: 25px;
     margin-bottom: 15px;
   }
 
   .banner-text .bottom-text,
   .slide-bg .bottom-text {
-    font-size: 13px;
+    font-size: 12px;
   }
 
   .content-right {
@@ -583,11 +583,11 @@
 
 @media (max-width: 485px) {
   .slider {
-    height: 150px;
+    height: 140px;
   }
 
   .slide:nth-child(2) {
-    height: 150px;
+    height: 140px;
   }
 
   .slide {
@@ -595,31 +595,35 @@
     height: 100%;
   }
 
+  .bottle-img {
+    width: 45%;
+    height: 100%;
+  }
+
   .banner-bg {
-    width: 125%;
+    width: 120%;
     height: 107%;
   }
 
   .banner-text {
     max-width: 100%;
-    padding-bottom: 0px;
   }
 
   .banner-text h3,
   .content-right h3 {
-    font-size: 37px;
+    font-size: 35px;
     margin-bottom: 8px;
   }
 
   .banner-text h2,
   .content-right h2 {
-    font-size: 17px;
+    font-size: 15px;
     margin-bottom: 10px;
   }
 
   .banner-text .bottom-text,
   .slide-bg .bottom-text {
-    font-size: 10px;
+    font-size: 8px;
   }
 
   .content-right {
@@ -705,11 +709,11 @@
 
 @media (max-width: 361px) {
   .slider {
-    height: 125px;
+    height: 120px;
   }
 
   .slide:nth-child(2) {
-    height: 125px;
+    height: 120px;
   }
 
   .slide {
@@ -717,8 +721,13 @@
     height: 100%;
   }
 
+  .bottle-img {
+    width: 45%;
+    height: 100%;
+  }
+
   .banner-bg {
-    width: 122%;
+    width: 130%;
     height: 107%;
   }
 
@@ -729,19 +738,19 @@
 
   .banner-text h3,
   .content-right h3 {
-    font-size: 33px;
+    font-size: 30px;
     margin-bottom: 8px;
   }
 
   .banner-text h2,
   .content-right h2 {
-    font-size: 14px;
+    font-size: 12px;
     margin-bottom: 10px;
   }
 
   .banner-text .bottom-text,
   .slide-bg .bottom-text {
-    font-size: 9px;
+    font-size: 8px;
   }
 
   .content-right {

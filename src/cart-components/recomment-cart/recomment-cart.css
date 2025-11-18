@@ -33,7 +33,7 @@
 .recommended-card {
   background: #0a0a0a;
   padding: 18px;
-  width: 350px;
+  width: 330px;
   cursor: pointer;
   transition: all 0.3s ease;
 }
@@ -43,7 +43,7 @@
 }
 
 .recommended-card .image-wrapper {
-  height: 360px;
+  height: 330px;
   display: flex;
   align-items: center;
   justify-content: center;
