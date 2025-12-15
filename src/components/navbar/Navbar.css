@@ -9,10 +9,6 @@
   transition: background-color 0.3s ease;
 }
 
-.navbar.scrolled {
-  background-color: #ccc;
-}
-
 .nav-item {
   color: white;
   font-size: 16px;
@@ -110,16 +106,6 @@
   font-size: 16px;
 }
 
-.navbar-cart,
-.navbar-heart {
-  font-family: "Inter", sans-serif;
-  font-size: 15px;
-  display: flex;
-  align-items: center;
-  font-weight: 600;
-  gap: 5px;
-}
-
 .navbar-cart:hover {
   color: #7A0000;
 }
@@ -131,6 +117,25 @@
 .navbar-heart:hover .heart-icon {
   fill: #7A0000;
   stroke: #7A0000;
+}
+
+.navbar-cart {
+  position: relative;
+}
+
+.cart-badge {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  background: #b30000;
+  color: white;
+  border-radius: 999px;
+  padding: 2px 6px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  min-width: 18px;
+  text-align: center;
 }
 
 .avatar-container {
@@ -218,7 +223,6 @@
   font-size: 17px;
   font-weight: 600;
 }
-
 
 @media (max-width: 900px) {
   .navbar-center {

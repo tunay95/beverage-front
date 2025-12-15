@@ -1,73 +1,131 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+import {
+  getUserFavorites,
+  setUserFavorites,
+  getUserCart,
+  setUserCart,
+} from "../../utils/adminStorage";
+
 import "./favourite.css";
 
-export default function Favorite() {
+export default function Favourite() {
   const [favorites, setFavorites] = useState([]);
   const [message, setMessage] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem("favorites")) || [];
-    setFavorites(saved);
+    setFavorites(getUserFavorites());
   }, []);
 
   const removeFavorite = (id) => {
     const updated = favorites.filter((item) => item.id !== id);
     setFavorites(updated);
-    localStorage.setItem("favorites", JSON.stringify(updated));
+    setUserFavorites(updated);
+
+    setMessage("Product removed from favourites");
+    setTimeout(() => setMessage(""), 2000);
   };
 
-  const addToCart = (product) => {
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
-    const existing = cart.find((item) => item.id === product.id);
+  const addToCart = (item) => {
+    let cart = getUserCart();
 
-    if (existing) existing.quantity += 1;
-    else cart.push({ ...product, quantity: 1 });
+    const existing = cart.find((x) => x.id === item.id);
+    if (existing) {
+      existing.quantity += 1;
+    } else {
+      cart.push({ ...item, quantity: 1 });
+    }
 
-    localStorage.setItem("cart", JSON.stringify(cart));
+    setUserCart(cart);
+    window.dispatchEvent(new Event("cartUpdated"));
 
-    removeFavorite(product.id);
+    // FAVOURITE-DƏN AVTOMATİK SİLMƏ
+    const updated = favorites.filter((f) => f.id !== item.id);
+    setFavorites(updated);
+    setUserFavorites(updated);
 
-    setMessage(`${product.name} added to cart!`);
+    // MESAJ
+    setMessage(`${item.name} added to cart`);
     setTimeout(() => setMessage(""), 2000);
   };
 
   return (
-    <div className="fav-page">
-      <h1 className="fav-title">Избранное</h1>
+    <div className="favourite-page">
+      <h2 className="favourite-title">Favourite</h2>
 
-      {message && <div className="fav-message">{message}</div>}
+      {/* 🔴 MESAJ BURADA OLMALIDIR – səhifənin yuxarısında */}
+      {message && <div className="favourite-message">{message}</div>}
 
-      <div className="fav-list">
-        {favorites.length === 0 ? (
-          <p className="empty">Нет избранных товаров...</p>
-        ) : (
-          favorites.map((item) => (
-            <div key={item.id} className="fav-item">
-              <img src={item.imageUrl} alt={item.name} />
+      {favorites.length === 0 ? (
+        <p className="favourite-empty">Favourite list is empty...</p>
+      ) : (
+        <div className="favourite-list">
+          {favorites.map((item) => {
+            const hasDiscount =
+              item.discountPrice &&
+              typeof item.discountPrice === "number" &&
+              item.discountPrice < item.price;
 
-              <div className="fav-info">
-                <h3>{item.name}</h3>
-                <p>{item.country}</p>
-                <div className="fav-price">
-                  {item.price.toLocaleString("ru-RU")} Р
+            return (
+              <div key={item.id} className="favourite-item">
+                <div className="favourite-left">
+                  <img
+                    src={item.imageUrl}
+                    alt={item.name}
+                    onClick={() => navigate(`/${item.category}/${item.id}`)}
+                    style={{ cursor: "pointer" }}
+                  />
+
+                  <div className="favourite-info">
+                    <div>
+                      <div className="fav-name">{item.name}</div>
+                      <div className="fav-country">
+                        {item.year} / {item.volume || "0.75 L"} •{" "}
+                        {item.country || "FRANCE"}
+                      </div>
+                    </div>
+
+                    <div></div>
+
+                    <div className="fav-price">
+                      {hasDiscount ? (
+                        <>
+                          <span className="old-price">
+                            {item.price.toLocaleString("ru-RU")} Р
+                          </span>
+                          <span className="discount-price">
+                            {item.discountPrice.toLocaleString("ru-RU")} Р
+                          </span>
+                        </>
+                      ) : (
+                        <span>{item.price.toLocaleString("ru-RU")} Р</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="favourite-actions">
+                  <button
+                    className="favourite-cart"
+                    onClick={() => addToCart(item)}
+                  >
+                    ADD TO CART
+                  </button>
+
+                  <button
+                    className="favourite-remove"
+                    onClick={() => removeFavorite(item.id)}
+                  >
+                    ✖
+                  </button>
                 </div>
               </div>
-
-              <div className="fav-actions">
-                <button className="fav-cart" onClick={() => addToCart(item)}>
-                  ADD TO CART
-                </button>
-                <button
-                  className="fav-remove"
-                  onClick={() => removeFavorite(item.id)}
-                >
-                  ✖
-                </button>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

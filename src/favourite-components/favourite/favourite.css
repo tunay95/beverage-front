@@ -1,77 +1,30 @@
-.fav-page {
+.favourite-page {
   background-color: #1b1919;
   color: white;
   padding: 80px 100px;
   min-height: 100vh;
 }
 
-.fav-title {
+.favourite-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-left: 40px;
+  flex-shrink: 0;
+}
+
+.favourite-title {
   font-size: 26px;
-  margin-bottom: 30px;
+  font-weight: 600;
+  margin-bottom: 40px;
 }
 
-.fav-list {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.fav-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #1c1c1c;
-  padding: 20px;
-  border-radius: 6px;
-}
-
-.fav-item img {
-  width: 80px;
-  height: 120px;
-  object-fit: contain;
-  background: black;
-  padding: 5px;
-}
-
-.fav-info h3 {
-  font-size: 18px;
-}
-
-.fav-info p {
+.favourite-empty {
   color: #bbbbbb;
-  margin-top: 5px;
 }
 
-.fav-price {
-  margin-top: 10px;
-  font-weight: 700;
-}
-
-.fav-actions {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.fav-cart {
+.favourite-message {
   background: #7a0000;
-  color: white;
-  border: none;
-  padding: 10px 14px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.fav-remove {
-  background: none;
-  border: none;
-  color: #b30000;
-  font-size: 20px;
-  cursor: pointer;
-}
-
-.fav-message {
-  background: #7A0000;
   color: white;
   padding: 12px 18px;
   margin-bottom: 20px;
@@ -79,7 +32,7 @@
   font-size: 16px;
   text-align: center;
   width: 100%;
-  max-width: 400px;
+  max-width: 420px;
   margin-left: auto;
   margin-right: auto;
   animation: fadeInOut 2s ease;
@@ -105,3 +58,337 @@
     transform: translateY(-10px);
   }
 }
+
+.old-price {
+  text-decoration: line-through;
+  opacity: 0.6;
+  margin-right: 6px;
+  display: inline-block;
+}
+
+.discount-price {
+  color: #ff4d4f;
+  font-weight: 600;
+}
+
+.favourite-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.favourite-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background: #1c1c1c;
+  border-radius: 8px;
+}
+
+.favourite-left {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 20px;
+  flex: 1;
+}
+
+.favourite-item img {
+  width: 90px;
+  height: 130px;
+  object-fit: contain;
+  background: black;
+  padding: 5px;
+  border-radius: 4px;
+}
+
+.favourite-info {
+  display: grid;
+  grid-template-columns: 2fr 2fr 1fr;
+  align-items: center;
+  width: 100%;
+  padding-left: 10px;
+  column-gap: 40px;
+}
+
+.fav-name {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.fav-country {
+  font-size: 14px;
+  color: #bbbbbb;
+}
+
+.fav-price {
+  font-size: 16px;
+  font-weight: 700;
+  text-align: right;
+}
+
+.favourite-actions {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.favourite-cart {
+  background: #7a0000;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.favourite-cart:hover {
+  background: #b00000;
+}
+
+.favourite-remove {
+  margin-right: 20px;
+  background: none;
+  border: none;
+  color: #d00000;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+@media (max-width: 1000px) {
+  .favourite-page {
+    padding: 60px 30px;
+  }
+
+  .favourite-title {
+    font-size: 26px;
+  }
+
+  .favourite-item {
+    border-radius: 0px;
+  }
+
+  .favourite-left {
+    gap: 20px;
+  }
+
+  .favourite-item img {
+    width: 90px;
+    height: 130px;
+    padding: 5px;
+  }
+
+  .favourite-info {
+    grid-template-columns: 2fr 2fr 1fr;
+    width: 100%;
+    padding-left: 10px;
+  }
+
+  .fav-name {
+    font-size: 18px;
+  }
+
+  .fav-country {
+    font-size: 14px;
+  }
+
+  .fav-price {
+    font-size: 16px;
+    text-align: right;
+  }
+
+  .favourite-actions {
+    gap: 12px;
+  }
+
+  .favourite-cart {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+
+  .favourite-remove {
+    margin-right: 20px;
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 850px) {
+  .favourite-info {
+    grid-template-columns: 1fr 1fr 1fr;
+    column-gap: 20px;
+  }
+}
+
+@media (max-width: 750px) {
+  .favourite-page {
+    padding: 60px 20px;
+  }
+
+  .favourite-title {
+    font-size: 24px;
+  }
+
+  .favourite-left {
+    gap: 10px;
+  }
+
+  .favourite-item img {
+    width: 90px;
+    height: 130px;
+    padding: 5px;
+  }
+
+  .favourite-info {
+    grid-template-columns: 2fr 2fr 1fr;
+    width: 100%;
+    padding-left: 10px;
+  }
+
+  .fav-name {
+    font-size: 17px;
+  }
+
+  .fav-country {
+    font-size: 14px;
+  }
+
+  .fav-price {
+    font-size: 15px;
+  }
+
+  .favourite-actions {
+    gap: 10px;
+  }
+
+  .favourite-cart {
+    padding: 10px 16px;
+    font-size: 12px;
+  }
+
+  .favourite-remove {
+    margin-right: 15px;
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 750px) {
+  .favourite-page {
+    padding: 40px 10px;
+  }
+
+  .favourite-title {
+    font-size: 22px;
+  }
+
+  .favourite-left {
+    gap: 10px;
+  }
+
+  .favourite-item img {
+    width: 100px;
+    height: 100px;
+    padding: 4px;
+  }
+
+  .favourite-info {
+    grid-template-columns: 2fr 2fr 1fr;
+    width: 100%;
+    padding-left: 0px;
+  }
+
+  .fav-name {
+    font-size: 10px;
+  }
+
+  .fav-country {
+    font-size: 10px;
+  }
+
+  .fav-price {
+    font-size: 10px;
+  }
+
+  .favourite-actions {
+    gap: 5px;
+  }
+
+  .favourite-cart {
+    padding: 7px 7px;
+    font-size: 10px;
+  }
+
+  .favourite-remove {
+    margin-right: 0px;
+    font-size: 18px;
+  }
+}
+
+/* @media (max-width: 600px) {
+  .favourite-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .favourite-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .favourite-info {
+    grid-template-columns: 1fr;
+    row-gap: 6px;
+  }
+   .favourite-page {
+    padding: 40px 10px;
+  }
+
+  .favourite-title {
+    font-size: 20px;
+  }
+
+  .favourite-left {
+    gap: 0px;
+  }
+
+  .favourite-item img {
+    width: 100px;
+    height: 120px;
+    padding: 5px;
+  }
+
+  .favourite-info {
+    grid-template-columns: 2fr 2fr 1fr;
+    width: 100%;
+    padding-left: 10px;
+  }
+
+  .fav-name {
+    font-size: 12px;
+  }
+
+  .fav-country {
+    font-size: 10px;
+  }
+
+  .fav-price {
+    font-size: 10px;
+  }
+
+  .favourite-actions {
+    gap: 0px;
+  }
+
+  .favourite-cart {
+    padding: 10px 16px;
+    font-size: 10px;
+    margin-left: -40px;
+  }
+
+  .favourite-remove {
+    margin-right: 250px;
+    font-size: 22px;
+  }
+} */

@@ -4,24 +4,30 @@ import ProductList from "../components/products/List/productList";
 import SommelierSection from "../components/sommelier-section/sommelierSection";
 import AboutSommelier from "../components/sommelier-section/aboutSommelier";
 import { useOutletContext } from "react-router-dom";
-import products from "../data/products";
+
+import { getAdminProducts } from "../utils/adminStorage";
+import baseProducts from "../data/products";
 
 export default function Home() {
   const { searchTerm } = useOutletContext();
 
-  // Home-da yalnız wine məhsulları göstərilir
-  const wineProducts = products.filter((p) => p.category === "wine");
+  const adminProducts = getAdminProducts();
+  const source =
+    adminProducts && adminProducts.length > 0 ? adminProducts : baseProducts;
+
+  const wineProducts = source.filter(
+    (p) => p.category === "wine" && !p.isDeleted
+  );
 
   return (
     <>
       <Slider />
       <FeaturesSection />
 
-      {/* Filter görünür, title göstərilmir */}
       <ProductList
         searchTerm={searchTerm}
         products={wineProducts}
-        title=""  // ⭐ boş qoy → universal-title görünməsin
+        title="" // title boş qalır
       />
 
       <SommelierSection />

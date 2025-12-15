@@ -3,13 +3,13 @@ import bottleImg from "../../assets/images/изображение для офф�
 import bannerBg from "../../assets/images/баннер (5).png";
 import slide2 from "../../assets/images/image2.png";
 import "./Slider.css";
-import { MoveRight, MoveLeft} from 'lucide-react';
+import { MoveRight, MoveLeft } from 'lucide-react';
 
 export default function Slider() {
   const slides = [
     {
       id: 1,
-      type: "combined", 
+      type: "combined",
     },
     {
       id: 2,

@@ -1,0 +1,157 @@
+.admin-products-page {
+    padding: 20px;
+    color: #fff;
+}
+
+.admin-products-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #7A0000;
+    padding-bottom: 8px;
+}
+
+.admin-products-header h2 {
+    font-size: 26px;
+}
+
+.admin-products-add-btn {
+    background: #7A0000;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    cursor: pointer;
+}
+
+.admin-products-add-btn:hover {
+    background: #b30707;
+}
+
+.admin-products-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.admin-products-table th,
+.admin-products-table td {
+    border: 1px solid #444;
+    padding: 8px 10px;
+    text-align: left;
+}
+
+.admin-products-table th {
+    background: #111;
+    font-weight: 600;
+}
+
+.admin-products-table tr:nth-child(even) {
+    background: #1a1a1a;
+}
+
+/* PRICE STYLE */
+.admin-old-price {
+    text-decoration: line-through;
+    opacity: 0.6;
+    margin-right: 6px;
+    display: inline-block;
+}
+
+.admin-new-price {
+    color: #ff4d4f;
+    font-weight: 600;
+}
+
+/* ACTION BUTTONS */
+
+.admin-products-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.admin-products-actions .edit-btn {
+    background: #1e7b00;
+    border: none;
+    color: #fff;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.admin-products-actions .edit-btn:hover {
+    background: #2ea600;
+}
+
+.admin-products-actions .del-btn {
+    background: #a00000;
+    border: none;
+    color: #fff;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.admin-products-actions .del-btn:hover {
+    background: #d00000;
+}
+
+/* SOFT DELETE STATE */
+
+.soft-deleted-row td {
+    opacity: 0.5;
+}
+
+.admin-products-actions .soft-del-btn,
+.admin-products-actions .revoc-btn {
+    border: none;
+    color: #fff;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.admin-products-actions .soft-del-btn {
+    background: #444;
+}
+
+.admin-products-actions .soft-del-btn:hover {
+    background: #666;
+}
+
+.admin-products-actions .revoc-btn {
+    background: #1f7a1f;
+}
+
+.admin-products-actions .revoc-btn:hover {
+    background: #27a327;
+}
+
+/* PAGINATION */
+
+.admin-products-pagination {
+    margin-top: 16px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.admin-products-pagination button {
+    background: #111;
+    color: #fff;
+    border: 1px solid #444;
+    padding: 4px 10px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.admin-products-pagination button:hover:not(:disabled) {
+    background: #222;
+}
+
+.admin-products-pagination button.active {
+    background: #7A0000;
+    border-color: #7A0000;
+}
+
+.admin-products-pagination button:disabled {
+    opacity: 0.5;
+    cursor: default;
+}

@@ -3,18 +3,22 @@ import { Link, useNavigate } from "react-router-dom";
 import { Heart } from "lucide-react";
 import "./productCard.css";
 
+import {
+  getUserCart,
+  setUserCart,
+  getUserFavorites,
+  setUserFavorites,
+} from "../../../utils/adminStorage";
+
 export default function ProductCard({ product }) {
   const navigate = useNavigate();
-
   const [isLoggedIn, setIsLoggedIn] = useState(
     !!localStorage.getItem("currentUser")
   );
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
-    const syncLogin = () => {
-      setIsLoggedIn(!!localStorage.getItem("currentUser"));
-    };
-
+    const syncLogin = () => setIsLoggedIn(!!localStorage.getItem("currentUser"));
     window.addEventListener("storage", syncLogin);
     return () => window.removeEventListener("storage", syncLogin);
   }, []);
@@ -29,66 +33,90 @@ export default function ProductCard({ product }) {
 
   const handleAddToCart = (e) => {
     e.preventDefault();
-
     if (!requireLogin()) return;
 
-    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+    let cart = getUserCart();
     const existing = cart.find((item) => item.id === product.id);
 
     if (existing) existing.quantity += 1;
     else cart.push({ ...product, quantity: 1 });
 
-    localStorage.setItem("cart", JSON.stringify(cart));
-    alert(`${product.name} added to cart!`);
+    setUserCart(cart);
+    window.dispatchEvent(new Event("cartUpdated")); // ✅ NAVBAR üçün
+
+    setMessage(`${product.name} added to cart!`);
+    setTimeout(() => setMessage(""), 2000);
   };
 
   const handleAddToFavorite = (e) => {
     e.preventDefault();
-
     if (!requireLogin()) return;
 
-    const favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+    let favorites = getUserFavorites();
 
     if (!favorites.find((x) => x.id === product.id)) {
       favorites.push(product);
-      localStorage.setItem("favorites", JSON.stringify(favorites));
+      setUserFavorites(favorites);
+      setMessage(`${product.name} added to favorites!`);
+    } else {
+      setMessage(`${product.name} is already in favorites`);
     }
 
-    alert(`${product.name} added to favorites!`);
+    setTimeout(() => setMessage(""), 2000);
   };
 
+  const hasDiscount =
+    product?.discountPrice &&
+    typeof product.discountPrice === "number" &&
+    product.discountPrice < product.price;
+
   return (
-    <Link to={`/${product.category}/${product.id}`} className="product-card">
-      <div className="img">
-        <img src={product.imageUrl} alt={product.name} />
-      </div>
+    <>
+      {message && <div className="product-toast">{message}</div>}
 
-      <div className="title">{product.name}</div>
-
-      <div className="meta">
-        {product.year} / {product.volume || "0.75 L"} •{" "}
-        {product.country || "ФРАНЦИЯ"}
-      </div>
-
-      <div className="price-row">
-
-        <div className="price">
-          {product.price
-            ? product.price.toLocaleString("ru-RU") + " Р"
-            : "—"}
+      <Link to={`/${product.category}/${product.id}`} className="product-card">
+        <div className="img">
+          {product.imageUrl ? (
+            <img src={product.imageUrl} alt={product.name} />
+          ) : null}
         </div>
 
-        <div className="buttons">
-          <button className="product-heart" onClick={handleAddToFavorite}>
-            <Heart className="heart-icon" />
-          </button>
+        <div className="title">{product.name}</div>
 
-          <button className="to-cart" onClick={handleAddToCart}>
-            ADD TO CART
-          </button>
+        <div className="meta">
+          {product.year} / {product.volume || "0.75 L"} •{" "}
+          {product.country || "ФРАНЦИЯ"}
         </div>
 
-      </div>
-    </Link>
+        <div className="price-row">
+          <div className="price">
+            {hasDiscount ? (
+              <>
+                <span className="old-price">
+                  {product.price.toLocaleString("ru-RU")} Р
+                </span>
+                <span className="discount-price">
+                  {product.discountPrice.toLocaleString("ru-RU")} Р
+                </span>
+              </>
+            ) : product.price ? (
+              `${product.price.toLocaleString("ru-RU")} Р`
+            ) : (
+              "—"
+            )}
+          </div>
+
+          <div className="buttons">
+            <button className="product-heart" onClick={handleAddToFavorite}>
+              <Heart className="heart-icon" />
+            </button>
+
+            <button className="to-cart" onClick={handleAddToCart}>
+              ADD TO CART
+            </button>
+          </div>
+        </div>
+      </Link>
+    </>
   );
 }

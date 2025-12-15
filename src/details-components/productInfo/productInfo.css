@@ -128,6 +128,18 @@
   font-size: 13px;
 }
 
+.old-price {
+  text-decoration: line-through;
+  opacity: 0.6;
+  margin-right: 6px;
+  display: inline-block;
+}
+
+.discount-price {
+  color: #ff4d4f;
+  font-weight: 600;
+}
+
 @media(max-width: 1290px) {
   .product-details {
     padding: 60px 80px;

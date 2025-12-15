@@ -33,7 +33,7 @@
 .recommended-card {
   background: #0a0a0a;
   padding: 18px;
-  width: 350px;
+  width: 330px;
   cursor: pointer;
   transition: all 0.3s ease;
 }
@@ -43,7 +43,7 @@
 }
 
 .recommended-card .image-wrapper {
-  height: 360px;
+  height: 330px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -61,7 +61,7 @@
 
 .recommended-card .rec-meta {
   color: #bdbdbd;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .recommended-card .rec-price {
@@ -76,20 +76,50 @@
   justify-content: space-between;
 }
 
-.recommended-card .rec-btn {
-  background: #7a0000;
-  color: #fff;
-  border: none;
-  padding: 10px 14px;
-  cursor: pointer;
-  font-weight: 700;
-  font-size: 13px;
-  transition: 0.3s;
+.rec-view-all-wrapper {
+  margin-top: 40px;
+  display: flex;
+  justify-content: flex-start;
+  /* istəsən center də edə bilərsən */
 }
 
-.recommended-card .rec-btn:hover {
-  background: #c00;
+.rec-view-all-btn {
+  font-family: "Inter", sans-serif;
+  font-weight: 800;
+  font-size: 15px;
+  color: #ffffff;
+  background: none;
+  border: none;
+  cursor: pointer;
+  letter-spacing: 1px;
+  position: relative;
+  padding-bottom: 4px;
+  transition: color 0.3s ease;
 }
+
+/* altındakı xət (şəkildəki kimi) */
+.rec-view-all-btn::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 80px;
+  height: 2px;
+  background: #ffffff;
+  transition: background 0.3s ease, width 0.3s ease;
+}
+
+.rec-view-all-btn:hover {
+  color: #a50000;
+}
+
+.rec-view-all-btn:hover::after {
+  background: #a50000;
+  width: 100px;
+}
+
+/* buttonların stili ProductCard / CartRecommended ilə eyni olacaq
+   (.buttons, .product-heart, .to-cart, .heart-icon) artıq productCard.css-də var */
 
 .arrow {
   background: none;
@@ -118,42 +148,17 @@
   right: -60px;
 }
 
-.pagination-dots {
-  display: flex;
-  justify-content: center;
-  margin-top: 30px;
-  gap: 8px;
+.old-price {
+  text-decoration: line-through;
+  opacity: 0.6;
+  margin-right: 6px;
+  display: inline-block;
 }
 
-.dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #555;
-  cursor: pointer;
-  transition: 0.3s;
+.discount-price {
+  color: #ff4d4f;
+  font-weight: 600;
 }
-
-.dot.active {
-  background: #a50000;
-}
-
-.view-all-btn {
-  font-family: "Inter";
-  font-weight: 800;
-  font-size: 15px;
-  color: #FFFFFF;
-  background: none;
-  font-size: 16px;
-  cursor: pointer;
-  letter-spacing: 1px;
-  transition: color 0.3s ease;
-}
-
-.view-all-btn:hover {
-  color: #a50000;
-}
-
 
 @media (max-width:820px) {
   .recommended-section {

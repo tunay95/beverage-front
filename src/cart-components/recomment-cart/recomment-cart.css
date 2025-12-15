@@ -8,6 +8,42 @@
   overflow: hidden;
 }
 
+.fav-message {
+  background: #7A0000;
+  color: white;
+  padding: 12px 18px;
+  margin-bottom: 20px;
+  border-radius: 6px;
+  font-size: 16px;
+  text-align: center;
+  width: 100%;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  animation: recFadeInOut 2s ease;
+}
+
+@keyframes recFadeInOut {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  20% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  80% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
 .recommended-title {
   font-size: 20px;
   font-weight: 600;
@@ -61,7 +97,7 @@
 
 .recommended-card .rec-meta {
   color: #bdbdbd;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .recommended-card .rec-price {
@@ -138,22 +174,57 @@
   background: #a50000;
 }
 
+
+.view-all-wrapper {
+  margin-top: 40px;
+  display: flex;
+  justify-content: flex-start;
+}
+
 .view-all-btn {
   font-family: "Inter";
   font-weight: 800;
   font-size: 15px;
   color: #FFFFFF;
   background: none;
-  font-size: 16px;
   cursor: pointer;
   letter-spacing: 1px;
+  border: none;
+  position: relative;
+  padding-bottom: 4px;
   transition: color 0.3s ease;
+}
+
+.view-all-btn::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 80px;
+  height: 2px;
+  background: #ffffff;
+  transition: background 0.3s ease, width 0.3s ease;
 }
 
 .view-all-btn:hover {
   color: #a50000;
 }
 
+.view-all-btn:hover::after {
+  background: #a50000;
+  width: 100px;
+}
+.old-price {
+  text-decoration: line-through;
+  opacity: 0.6;
+  margin-right: 6px;
+  display: inline-block;
+}
+
+.discount-price {
+  color: #ff4d4f;
+  font-weight: 600;
+}
 
 @media (max-width:820px) {
   .recommended-section {
@@ -191,7 +262,7 @@
 
   .recommended-card .rec-meta {
     color: #bdbdbd;
-    font-size: 13px;
+    font-size: 11px;
   }
 
   .recommended-card .rec-price {

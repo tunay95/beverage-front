@@ -18,13 +18,36 @@ export default function RegisterForm() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!formData.name || !formData.email || !formData.password) {
+
+    const name = formData.name.trim();
+    const email = formData.email.trim().toLowerCase();
+    const password = formData.password;
+
+    if (!name || !email || !password) {
       setError("Bütün xanaları doldurun!");
+      setSuccessMessage("");
       return;
     }
 
-    localStorage.setItem("userData", JSON.stringify(formData));
+    // Mövcud istifadəçilər (array)
+    const users = JSON.parse(localStorage.getItem("users")) || [];
+
+    // Eyni email varsa — error
+    const exists = users.find((u) => u.email.toLowerCase() === email);
+    if (exists) {
+      setError("Bu email ilə istifadəçi artıq mövcuddur!");
+      setSuccessMessage("");
+      return;
+    }
+
+    const newUser = { name, email, password };
+    const updatedUsers = [...users, newUser];
+
+    localStorage.setItem("users", JSON.stringify(updatedUsers));
+
+    setError("");
     setSuccessMessage("Qeydiyyat uğurla tamamlandı!");
+
     setTimeout(() => navigate("/auth/login"), 2000);
   };
 
@@ -32,9 +55,12 @@ export default function RegisterForm() {
     <div className="register-form">
       <form onSubmit={handleSubmit} className="register-form-container">
         <div className="register">Register</div>
+
         {error && <div className="register-form-error-message">{error}</div>}
         {successMessage && (
-          <div className="register-form-success-message">{successMessage}</div>
+          <div className="register-form-success-message">
+            {successMessage}
+          </div>
         )}
 
         <input
@@ -55,6 +81,7 @@ export default function RegisterForm() {
           placeholder="Şifrə"
           onChange={handleChange}
         />
+
         <button type="submit" className="register-btn-white">
           Qeydiyyat
         </button>

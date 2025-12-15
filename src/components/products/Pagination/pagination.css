@@ -16,13 +16,15 @@
   transition: all 0.2s ease;
 }
 
-.page-btn:hover { 
-  background: #333; 
+.page-btn:hover {
+  background: #333;
 }
+
 .page-btn.active {
   background: #7A0000;
   font-weight: 700;
 }
+
 .page-btn:disabled {
-  opacity: .3; 
+  opacity: .3;
 }

@@ -24,6 +24,7 @@
 .sort-bar select:hover {
   background-color: #333;
 }
+
 @media (max-width: 1400px) {
   .sort-bar {
     margin-bottom: 30px;
@@ -38,7 +39,6 @@
     font-size: 17px;
   }
 }
-
 
 @media (max-width: 1024px) {
   .sort-bar {

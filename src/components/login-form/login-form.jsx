@@ -11,27 +11,54 @@ export default function LoginForm() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const storedData = localStorage.getItem("userData");
 
-    if (!storedData) {
-      setError("İstifadəçi tapılmadı. Qeydiyyatdan keçin!");
-      setTimeout(() => navigate("/auth/register"), 3000);
+    const trimmedEmail = email.trim().toLowerCase();
+
+    // 🔴 ADMIN LOGIN
+    if (trimmedEmail === "admin@gmail.com" && password === "Admin") {
+      localStorage.setItem("isAdmin", "true");
+      localStorage.removeItem("currentUser");
+
+      setSuccessMessage("Admin kimi daxil oldunuz!");
+      setError("");
+
+      setTimeout(() => navigate("/admin"), 1500);
       return;
     }
 
-    const userData = JSON.parse(storedData);
+    // 🔹 İstifadəçi siyahısını oxu (array şəklində)
+    const storedUsers = JSON.parse(localStorage.getItem("users")) || [];
 
-    if (userData.email === email && userData.password === password) {
+    if (!storedUsers.length) {
+      setError("İstifadəçi tapılmadı. Qeydiyyatdan keçin!");
+      setSuccessMessage("");
+
+      setTimeout(() => navigate("/auth/register"), 2000);
+      return;
+    }
+
+    // 🔹 Email + şifrə ilə uyğun user tap
+    const user = storedUsers.find(
+      (u) => u.email.toLowerCase() === trimmedEmail && u.password === password
+    );
+
+    if (user) {
       const loginData = {
-        name: userData.name,
-        email: userData.email,
+        name: user.name,
+        email: user.email,
         loginTime: new Date().toISOString(),
       };
+
       localStorage.setItem("currentUser", JSON.stringify(loginData));
+      localStorage.removeItem("isAdmin");
+
       setSuccessMessage("Uğurla daxil oldunuz!");
+      setError("");
+
       setTimeout(() => navigate("/"), 1500);
     } else {
       setError("Email və ya şifrə yanlışdır!");
+      setSuccessMessage("");
     }
   };
 
@@ -65,9 +92,15 @@ export default function LoginForm() {
           Daxil ol
         </button>
 
-        <div className="register-text">
-          Hesabın yoxdur?{" "}
-          <Link to="/auth/register" className="register-link">
+        <div
+          style={{
+            textAlign: "center",
+            marginTop: "10px",
+            color: "#fff",
+          }}
+        >
+          Hesabınız yoxdur?{" "}
+          <Link to="/auth/register" style={{ color: "#aa0707ff" }}>
             Qeydiyyatdan keç
           </Link>
         </div>
