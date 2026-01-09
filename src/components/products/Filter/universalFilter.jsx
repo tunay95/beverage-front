@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from "react";
 import "./universalFilter.css";
 
-export default function UniversalFilter({ title, onFilterChange, showFields = {} }) {
+export default function UniversalFilter({
+  title,
+  onFilterChange,
+  showFields = {},
+  filterOptions = {},
+}) {
   const {
     color = true,
     sweetness = true,
     price = true,
+    categories = true,
   } = showFields;
 
   const [filters, setFilters] = useState({
@@ -13,6 +19,8 @@ export default function UniversalFilter({ title, onFilterChange, showFields = {}
     sweetness: "",
     minPrice: "",
     maxPrice: "",
+    categoryId: "",
+    subCategoryId: "",
   });
 
   const [showFilters, setShowFilters] = useState(false);
@@ -36,6 +44,21 @@ export default function UniversalFilter({ title, onFilterChange, showFields = {}
     setFilters((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleCategory = (id) => {
+    setFilters((prev) => ({
+      ...prev,
+      categoryId: prev.categoryId === id ? "" : id,
+      subCategoryId: "",
+    }));
+  };
+
+  const handleSubCategory = (id) => {
+    setFilters((prev) => ({
+      ...prev,
+      subCategoryId: prev.subCategoryId === id ? "" : id,
+    }));
+  };
+
   useEffect(() => {
     onFilterChange(filters);
   }, [filters]);
@@ -55,6 +78,32 @@ export default function UniversalFilter({ title, onFilterChange, showFields = {}
       )}
 
       <div className={`universal-filters ${!isMobile || showFilters ? "show" : ""}`}>
+
+        {categories && Array.isArray(filterOptions.categories) && filterOptions.categories.length > 0 && (
+          filterOptions.categories.map((cat) => (
+            <div key={cat.id} className="universal-filter-block">
+              <h3>{cat.name}</h3>
+              {Array.isArray(cat.subCategories) && cat.subCategories.length > 0 && (
+                <ul>
+                  {cat.subCategories.map((sub) => (
+                    <li key={sub.id}>
+                      <label>
+                        <input
+                          type="radio"
+                          name="subcategory"
+                          checked={filters.subCategoryId === sub.id}
+                          onClick={() => handleSubCategory(sub.id)}
+                          readOnly
+                        />
+                        {sub.name}
+                      </label>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))
+        )}
 
         {color && (
           <div className="universal-filter-block">
@@ -111,6 +160,7 @@ export default function UniversalFilter({ title, onFilterChange, showFields = {}
                 value={filters.minPrice}
                 onChange={handlePriceChange}
                 min="0"
+                defaultValue={filterOptions.minPrice || ""}
               />
               <input
                 type="number"
@@ -119,8 +169,8 @@ export default function UniversalFilter({ title, onFilterChange, showFields = {}
                 value={filters.maxPrice}
                 onChange={handlePriceChange}
                 min="0"
+                defaultValue={filterOptions.maxPrice || ""}
               />
-              <button className="universal-price-ok">OK</button>
             </div>
           </div>
         )}

@@ -1,0 +1,133 @@
+.create-product-page,
+.edit-product-page {
+	padding: 2rem;
+	color: #fff;
+}
+
+.form-card {
+	background: rgba(255, 255, 255, 0.05);
+	border-radius: 10px;
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	padding: 1.75rem;
+	backdrop-filter: blur(10px);
+}
+
+.form-card h2 {
+	margin: 0 0 1rem 0;
+}
+
+.error-message {
+	background: rgba(244, 67, 54, 0.1);
+	color: #ff5252;
+	padding: 1rem;
+	border-radius: 8px;
+	margin-bottom: 1.5rem;
+	border: 1px solid rgba(244, 67, 54, 0.3);
+}
+
+.product-form-simple {
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
+}
+
+.form-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+	gap: 1rem 1.25rem;
+}
+
+.form-grid label {
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+	font-weight: 600;
+	color: #eaeaea;
+}
+
+.form-grid input,
+.form-grid select {
+	padding: 0.75rem;
+	border-radius: 6px;
+	border: 1px solid rgba(255, 255, 255, 0.15);
+	background: rgba(255, 255, 255, 0.05);
+	color: #fff;
+	font-size: 1rem;
+	transition: all 0.2s;
+}
+
+.form-grid input:focus,
+.form-grid select:focus {
+	outline: none;
+	border-color: #667eea;
+	background: rgba(255, 255, 255, 0.08);
+}
+
+.form-grid input::placeholder {
+	color: rgba(255, 255, 255, 0.6);
+}
+
+.select-input option {
+	background: #1e1e2a;
+	color: #f5f5f5;
+}
+
+.thumb {
+	margin-top: 0.5rem;
+	max-width: 120px;
+	border-radius: 6px;
+	overflow: hidden;
+}
+
+.thumb img {
+	width: 100%;
+	height: auto;
+	display: block;
+}
+
+.form-actions {
+	display: flex;
+	gap: 1rem;
+	margin-top: 0.5rem;
+}
+
+.add-btn {
+	padding: 0.75rem 1.5rem;
+	font-size: 1rem;
+	font-weight: 600;
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	color: white;
+	border: none;
+	border-radius: 6px;
+	cursor: pointer;
+	transition: all 0.3s;
+}
+
+.add-btn:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.add-btn:disabled {
+	opacity: 0.6;
+	cursor: default;
+	transform: none;
+	box-shadow: none;
+}
+
+.cancel-btn {
+	padding: 0.75rem 1.5rem;
+	font-size: 1rem;
+	font-weight: 600;
+	background: rgba(255, 255, 255, 0.1);
+	color: #fff;
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	border-radius: 6px;
+	cursor: pointer;
+	transition: all 0.3s;
+}
+
+.cancel-btn:hover {
+	background: rgba(255, 255, 255, 0.15);
+	border-color: rgba(255, 255, 255, 0.3);
+}

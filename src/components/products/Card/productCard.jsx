@@ -2,67 +2,97 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Heart } from "lucide-react";
 import "./productCard.css";
-
-import {
-  getUserCart,
-  setUserCart,
-  getUserFavorites,
-  setUserFavorites,
-} from "../../../utils/adminStorage";
+import { useAuth } from "../../../hooks/useAuth";
+import * as wishlistApi from "../../../data/wishlistApi";
+import * as orderApi from "../../../data/orderApi";
 
 export default function ProductCard({ product }) {
   const navigate = useNavigate();
-  const [isLoggedIn, setIsLoggedIn] = useState(
-    !!localStorage.getItem("currentUser")
-  );
+  const { isAuthenticated } = useAuth();
   const [message, setMessage] = useState("");
+  const [isInWishlist, setIsInWishlist] = useState(product?.isInWishlist || false);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
+  const [cartLoading, setCartLoading] = useState(false);
 
   useEffect(() => {
-    const syncLogin = () => setIsLoggedIn(!!localStorage.getItem("currentUser"));
-    window.addEventListener("storage", syncLogin);
-    return () => window.removeEventListener("storage", syncLogin);
-  }, []);
+    if (isAuthenticated && product?.id) {
+      checkWishlistStatus();
+    }
+  }, [isAuthenticated, product?.id]);
 
-  const requireLogin = () => {
-    if (!isLoggedIn) {
+  const checkWishlistStatus = async () => {
+    try {
+      const status = await wishlistApi.isInWishlist(product.id);
+      setIsInWishlist(status);
+    } catch (err) {
+      console.error("Failed to check wishlist status:", err);
+    }
+  };
+
+  const handleAddToCart = async (e) => {
+    e.preventDefault();
+    
+    if (!isAuthenticated) {
       navigate("/auth/login");
-      return false;
-    }
-    return true;
-  };
-
-  const handleAddToCart = (e) => {
-    e.preventDefault();
-    if (!requireLogin()) return;
-
-    let cart = getUserCart();
-    const existing = cart.find((item) => item.id === product.id);
-
-    if (existing) existing.quantity += 1;
-    else cart.push({ ...product, quantity: 1 });
-
-    setUserCart(cart);
-    window.dispatchEvent(new Event("cartUpdated")); // ✅ NAVBAR üçün
-
-    setMessage(`${product.name} added to cart!`);
-    setTimeout(() => setMessage(""), 2000);
-  };
-
-  const handleAddToFavorite = (e) => {
-    e.preventDefault();
-    if (!requireLogin()) return;
-
-    let favorites = getUserFavorites();
-
-    if (!favorites.find((x) => x.id === product.id)) {
-      favorites.push(product);
-      setUserFavorites(favorites);
-      setMessage(`${product.name} added to favorites!`);
-    } else {
-      setMessage(`${product.name} is already in favorites`);
+      return;
     }
 
-    setTimeout(() => setMessage(""), 2000);
+    if (cartLoading) return;
+
+    try {
+      setCartLoading(true);
+      await orderApi.addToCart(product.id, 1);
+      window.dispatchEvent(new Event("cartUpdated"));
+
+      setMessage(`${product.name || product.title} added to cart!`);
+    } catch (err) {
+      console.error("Cart error:", err);
+      if (err.response?.status === 401) {
+        navigate("/auth/login");
+      } else {
+        setMessage("Failed to add to cart. Please try again.");
+      }
+    } finally {
+      setCartLoading(false);
+      setTimeout(() => setMessage(""), 2000);
+    }
+  };
+
+  const handleAddToFavorite = async (e) => {
+    e.preventDefault();
+    
+    if (!isAuthenticated) {
+      navigate("/auth/login");
+      return;
+    }
+
+    if (wishlistLoading) return;
+
+    try {
+      setWishlistLoading(true);
+
+      if (isInWishlist) {
+        await wishlistApi.removeByProductId(product.id);
+        setIsInWishlist(false);
+        setMessage(`${product.name || product.title} removed from wishlist!`);
+      } else {
+        await wishlistApi.addToWishlist(product.id);
+        setIsInWishlist(true);
+        setMessage(`${product.name || product.title} added to wishlist!`);
+      }
+
+      window.dispatchEvent(new Event("wishlistUpdated"));
+    } catch (err) {
+      console.error("Wishlist error:", err);
+      if (err.response?.status === 401) {
+        navigate("/auth/login");
+      } else {
+        setMessage("Failed to update wishlist. Please try again.");
+      }
+    } finally {
+      setWishlistLoading(false);
+      setTimeout(() => setMessage(""), 2000);
+    }
   };
 
   const hasDiscount =
@@ -93,26 +123,33 @@ export default function ProductCard({ product }) {
             {hasDiscount ? (
               <>
                 <span className="old-price">
-                  {product.price.toLocaleString("ru-RU")} Р
+                  {product.price.toLocaleString("ru-RU")} ₼
                 </span>
                 <span className="discount-price">
-                  {product.discountPrice.toLocaleString("ru-RU")} Р
+                  {product.discountPrice.toLocaleString("ru-RU")} ₼
                 </span>
               </>
             ) : product.price ? (
-              `${product.price.toLocaleString("ru-RU")} Р`
+              `${product.price.toLocaleString("ru-RU")} ₼`
             ) : (
               "—"
             )}
           </div>
 
           <div className="buttons">
-            <button className="product-heart" onClick={handleAddToFavorite}>
-              <Heart className="heart-icon" />
+            <button 
+              className={`product-heart ${isInWishlist ? "in-wishlist" : ""}`}
+              onClick={handleAddToFavorite}
+              disabled={wishlistLoading}
+            >
+              <Heart 
+                className="heart-icon" 
+                fill={isInWishlist ? "currentColor" : "none"}
+              />
             </button>
 
-            <button className="to-cart" onClick={handleAddToCart}>
-              ADD TO CART
+            <button className="to-cart" onClick={handleAddToCart} disabled={cartLoading}>
+              {cartLoading ? "ADDING..." : "ADD TO CART"}
             </button>
           </div>
         </div>

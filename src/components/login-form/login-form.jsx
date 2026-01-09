@@ -1,64 +1,61 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
 import "./login-form.css";
 
 export default function LoginForm() {
   const navigate = useNavigate();
+  const auth = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+    setSuccessMessage("");
+    setIsLoading(true);
 
     const trimmedEmail = email.trim().toLowerCase();
 
-    // 🔴 ADMIN LOGIN
-    if (trimmedEmail === "admin@gmail.com" && password === "Admin") {
-      localStorage.setItem("isAdmin", "true");
-      localStorage.removeItem("currentUser");
-
-      setSuccessMessage("Admin kimi daxil oldunuz!");
-      setError("");
-
-      setTimeout(() => navigate("/admin"), 1500);
-      return;
-    }
-
-    // 🔹 İstifadəçi siyahısını oxu (array şəklində)
-    const storedUsers = JSON.parse(localStorage.getItem("users")) || [];
-
-    if (!storedUsers.length) {
-      setError("İstifadəçi tapılmadı. Qeydiyyatdan keçin!");
-      setSuccessMessage("");
-
-      setTimeout(() => navigate("/auth/register"), 2000);
-      return;
-    }
-
-    // 🔹 Email + şifrə ilə uyğun user tap
-    const user = storedUsers.find(
-      (u) => u.email.toLowerCase() === trimmedEmail && u.password === password
-    );
-
-    if (user) {
-      const loginData = {
-        name: user.name,
-        email: user.email,
-        loginTime: new Date().toISOString(),
+    try {
+      const loginDto = {
+        usernameOrEmail: trimmedEmail,
+        password: password,
       };
 
-      localStorage.setItem("currentUser", JSON.stringify(loginData));
-      localStorage.removeItem("isAdmin");
+      await auth.login(loginDto);
 
-      setSuccessMessage("Uğurla daxil oldunuz!");
-      setError("");
-
-      setTimeout(() => navigate("/"), 1500);
-    } else {
-      setError("Email və ya şifrə yanlışdır!");
-      setSuccessMessage("");
+      setSuccessMessage("Logged in successfully!");
+      
+      setTimeout(() => {
+        navigate("/");
+      }, 1000);
+    } catch (err) {
+      console.error("Login error:", err);
+      
+      if (err.response?.status === 400) {
+        // FluentValidation errors
+        const errors = err.response?.data?.errors || err.response?.data;
+        if (Array.isArray(errors)) {
+          setError(errors.map(e => e.errorMessage || e).join(", "));
+        } else if (typeof errors === 'object') {
+          const messages = Object.values(errors).flat();
+          setError(messages.join(", "));
+        } else {
+          setError(err.response?.data?.message || "Email or password is incorrect!");
+        }
+      } else if (err.response?.status === 401) {
+        setError("Email or password is incorrect!");
+      } else if (err.code === 'ERR_NETWORK') {
+        setError("Network error. Please try again.");
+      } else {
+        setError(err.response?.data?.message || "Login failed!");
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -76,20 +73,26 @@ export default function LoginForm() {
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="Email daxil edin"
+          placeholder="Enter email"
           required
+          disabled={isLoading}
         />
 
         <input
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="Şifrə daxil edin"
+          placeholder="Enter password"
           required
+          disabled={isLoading}
         />
 
-        <button type="submit" className="login-btn-white">
-          Daxil ol
+        <button 
+          type="submit" 
+          className="login-btn-white"
+          disabled={isLoading}
+        >
+          {isLoading ? 'Please wait...' : 'Log in'}
         </button>
 
         <div
@@ -99,10 +102,15 @@ export default function LoginForm() {
             color: "#fff",
           }}
         >
-          Hesabınız yoxdur?{" "}
+          Don't have an account?{" "}
           <Link to="/auth/register" style={{ color: "#aa0707ff" }}>
-            Qeydiyyatdan keç
+            Register
           </Link>
+          <div style={{ marginTop: "8px" }}>
+            <Link to="/" style={{ color: "#ccc", textDecoration: "underline" }}>
+              Return to home page
+            </Link>
+          </div>
         </div>
       </form>
     </div>

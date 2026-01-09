@@ -1,62 +1,89 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
-import { getUserCart, setUserCart } from "../../utils/userStorage";
-
+import { useAuth } from "../../hooks/useAuth";
+import * as orderApi from "../../data/orderApi";
 import PaymentModal from "../payment/PaymentModal";
-
 import "./cart.css";
 
 export default function Cart() {
   const [cartItems, setCartItems] = useState([]);
   const [isPayOpen, setIsPayOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [cartSummary, setCartSummary] = useState({
+    subtotal: 0,
+    discount: 0,
+    shippingPrice: 100,
+    total: 0
+  });
 
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
-    setCartItems(getUserCart());
-  }, []);
+    if (!isAuthenticated) {
+      navigate("/auth/login");
+      return;
+    }
+    loadCart();
+  }, [isAuthenticated]);
 
-  useEffect(() => {
-    const listener = () => setCartItems(getUserCart());
-    window.addEventListener("cartUpdated", listener);
-    return () => window.removeEventListener("cartUpdated", listener);
-  }, []);
-
-  const updateQuantity = (id, qty) => {
-    const updated = cartItems.map((item) =>
-      item.id === id ? { ...item, quantity: Math.max(1, qty) } : item
-    );
-    setCartItems(updated);
-    setUserCart(updated);
-    window.dispatchEvent(new Event("cartUpdated"));
+  const loadCart = async () => {
+    try {
+      setLoading(true);
+      const data = await orderApi.getCart();
+      console.log("Cart data:", data);
+      setCartItems(data.items || []);
+      setCartSummary({
+        subtotal: data.subtotal || 0,
+        discount: data.discount || 0,
+        shippingPrice: data.shippingPrice || 100,
+        total: data.total || 0
+      });
+    } catch (err) {
+      console.error("Failed to load cart:", err);
+      if (err.response?.status === 401) {
+        navigate("/auth/login");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const removeItem = (id) => {
-    const updated = cartItems.filter((item) => item.id !== id);
-    setCartItems(updated);
-    setUserCart(updated);
-    window.dispatchEvent(new Event("cartUpdated"));
+  const updateQuantity = async (productId, qty) => {
+    if (qty < 1) return;
+    
+    try {
+      await orderApi.updateCartItem(productId, qty);
+      await loadCart();
+      window.dispatchEvent(new Event("cartUpdated"));
+    } catch (err) {
+      console.error("Failed to update cart:", err);
+    }
   };
 
-  const originalSubtotal = cartItems.reduce(
-    (acc, item) => acc + item.price * item.quantity,
-    0
-  );
-
-  const discountedSubtotal = cartItems.reduce((acc, item) => {
-    const unitPrice = item.discountPrice ?? item.price;
-    return acc + unitPrice * item.quantity;
-  }, 0);
-
-  const discountAmount = originalSubtotal - discountedSubtotal;
-  const delivery = 100;
-  const total = discountedSubtotal + delivery;
+  const removeItem = async (productId) => {
+    try {
+      await orderApi.removeFromCart(productId);
+      await loadCart();
+      window.dispatchEvent(new Event("cartUpdated"));
+    } catch (err) {
+      console.error("Failed to remove from cart:", err);
+    }
+  };
 
   const openCheckout = () => {
     if (cartItems.length === 0) return;
     setIsPayOpen(true);
   };
+
+  if (loading) {
+    return (
+      <div className="cart-page">
+        <h1 className="cart-title">MY CART</h1>
+        <p className="empty">Loading cart...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="cart-page">
@@ -75,52 +102,33 @@ export default function Cart() {
             <p className="empty">The cart is empty...</p>
           ) : (
             cartItems.map((item) => {
-              const unitPrice = item.discountPrice ?? item.price;
-              const lineTotal = unitPrice * item.quantity;
-
               return (
-                <div key={item.id} className="cart-row">
+                <div key={item.productId} className="cart-row">
                   <div className="col-product">
                     <div
                       className="cart-product-info"
-                      onClick={() => navigate(`/${item.category}/${item.id}`)}
+                      onClick={() => navigate(`/wine/${item.productId}`)}
                       style={{ cursor: "pointer" }}
                     >
                       <div className="cart-product-img">
-                        <img src={item.imageUrl} alt={item.name} />
+                        <img src={item.imageUrl} alt={item.title} />
                       </div>
 
                       <div className="cart-product-text">
-                        <h3>{item.name}</h3>
-                        <p>
-                          {item.year} / {item.volume || "0.75 L"} •{" "}
-                          {item.country || "FRANCE"}
-                        </p>
+                        <h3>{item.title}</h3>
                       </div>
                     </div>
                   </div>
 
                   <div className="col-price">
-                    {typeof item.discountPrice === "number" &&
-                    item.discountPrice < item.price ? (
-                      <>
-                        <span className="old-price">
-                          {item.price.toLocaleString("ru-RU")} Р
-                        </span>
-                        <span className="discount-price">
-                          {item.discountPrice.toLocaleString("ru-RU")} Р
-                        </span>
-                      </>
-                    ) : (
-                      <span>{item.price.toLocaleString("ru-RU")} Р</span>
-                    )}
+                    <span>{(item.total / item.quantity).toLocaleString("ru-RU")} ₼</span>
                   </div>
 
                   <div className="col-qty">
                     <div className="quantity">
                       <button
                         onClick={() =>
-                          updateQuantity(item.id, item.quantity - 1)
+                          updateQuantity(item.productId, item.quantity - 1)
                         }
                       >
                         −
@@ -128,7 +136,7 @@ export default function Cart() {
                       <span>{item.quantity}</span>
                       <button
                         onClick={() =>
-                          updateQuantity(item.id, item.quantity + 1)
+                          updateQuantity(item.productId, item.quantity + 1)
                         }
                       >
                         +
@@ -137,12 +145,12 @@ export default function Cart() {
                   </div>
 
                   <div className="col-total">
-                    {lineTotal.toLocaleString("ru-RU")} Р
+                    {item.total.toLocaleString("ru-RU")} ₼
                     <button
                       className="remove"
-                      onClick={() => removeItem(item.id)}
+                      onClick={() => removeItem(item.productId)}
                     >
-                      ✖
+                      ✕
                     </button>
                   </div>
                 </div>
@@ -156,28 +164,28 @@ export default function Cart() {
 
           <div className="summary-line">
             <span>Sum</span>
-            <span>{originalSubtotal.toLocaleString("ru-RU")} Р</span>
+            <span>{cartSummary.subtotal.toLocaleString("ru-RU")} ₼</span>
           </div>
 
           <div className="summary-line">
             <span>Discount</span>
             <span>
-              {discountAmount > 0
-                ? `- ${discountAmount.toLocaleString("ru-RU")} Р`
-                : "0 Р"}
+              {cartSummary.discount > 0
+                ? `- ${cartSummary.discount.toLocaleString("ru-RU")} ₼`
+                : "0 ₼"}
             </span>
           </div>
 
           <div className="summary-line">
             <span>Delivery</span>
-            <span>{delivery.toLocaleString("ru-RU")} Р</span>
+            <span>{cartSummary.shippingPrice.toLocaleString("ru-RU")} ₼</span>
           </div>
 
           <hr />
 
           <div className="summary-total">
             <span>For payment</span>
-            <span>{total.toLocaleString("ru-RU")} Р</span>
+            <span>{cartSummary.total.toLocaleString("ru-RU")} ₼</span>
           </div>
 
           <button className="checkout-btn" onClick={openCheckout}>
@@ -190,12 +198,9 @@ export default function Cart() {
         isOpen={isPayOpen}
         onClose={() => setIsPayOpen(false)}
         cartItems={cartItems}
-        subtotal={originalSubtotal}
-        delivery={delivery}
-        total={total}
-        onSuccess={() => {
-          setCartItems([]);
-          setUserCart([]);
+        cartSummary={cartSummary}
+        onSuccess={async () => {
+          await loadCart();
           window.dispatchEvent(new Event("cartUpdated"));
         }}
       />

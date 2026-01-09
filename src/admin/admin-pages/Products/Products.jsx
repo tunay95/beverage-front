@@ -1,73 +1,81 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import baseProducts from "../../../data/products";
-import { getAdminProducts, setAdminProducts } from "../../../utils/adminStorage";
+import * as productApi from "../../../data/productApi";
 
 import "./Products.css";
-
-function normalizeProduct(p, index) {
-  return {
-    ...p,
-    id: p.id ?? index + 1,
-    quantity:
-      typeof p.quantity === "number"
-        ? p.quantity
-        : p.quantity
-        ? Number(p.quantity)
-        : 0,
-    isDeleted: !!p.isDeleted,
-    discountPercent: p.discountPercent ?? null,
-    discountPrice: p.discountPrice ?? null,
-  };
-}
 
 export default function Products() {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  // pagination
-  const [page, setPage] = useState(1);
-  const perPage = 10;
-
-  // İlk açılışda: əgər localStorage-də məhsul yoxdursa, data/products-dan kopyalayırıq
   useEffect(() => {
-    const saved = getAdminProducts();
-
-    if (saved && saved.length > 0) {
-      const normalized = saved.map((p, idx) => normalizeProduct(p, idx));
-      setProducts(normalized);
-      setAdminProducts(normalized);
-    } else {
-      const normalized = baseProducts.map((p, idx) => normalizeProduct(p, idx));
-      setProducts(normalized);
-      setAdminProducts(normalized);
-    }
+    loadProducts();
   }, []);
 
-  const saveProducts = (updated) => {
-    setProducts(updated);
-    setAdminProducts(updated);
-  };
-
-  // məhsul sayı dəyişəndə, səhifə limitdən böyükdürsə geri çək
-  useEffect(() => {
-    const totalPages = Math.max(1, Math.ceil(products.length / perPage));
-    if (page > totalPages) {
-      setPage(totalPages);
+  const loadProducts = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const data = await productApi.getAllProducts();
+      setProducts(data || []);
+    } catch (err) {
+      console.error("Failed to load products:", err);
+      setError(err.response?.data?.message || "Failed to load products");
+    } finally {
+      setLoading(false);
     }
-  }, [products, page]);
-
-  const handleDelete = (id) => {
-    if (!window.confirm("Bu məhsulu silmək istəyirsiniz?")) return;
-    const updated = products.filter((p) => p.id !== id);
-    saveProducts(updated);
   };
 
-  const handleSoftToggle = (id) => {
-    const updated = products.map((p) =>
-      p.id === id ? { ...p, isDeleted: !p.isDeleted } : p
-    );
-    saveProducts(updated);
+  const handleToggleActive = async (product) => {
+    try {
+      setError("");
+      if (product.isActive) {
+        await productApi.deactivateProduct(product.id);
+      } else {
+        await productApi.activateProduct(product.id);
+      }
+      loadProducts();
+    } catch (err) {
+      console.error("Failed to toggle status:", err);
+      setError(err.response?.data?.message || "Failed to toggle status");
+    }
+  };
+
+  const handleSoftDelete = async (id) => {
+    if (!window.confirm("Soft delete this product?")) return;
+    try {
+      setError("");
+      await productApi.softDeleteProduct(id);
+      loadProducts();
+    } catch (err) {
+      console.error("Failed to soft delete product:", err);
+      setError(err.response?.data?.message || "Failed to soft delete product");
+    }
+  };
+
+  const handleRecover = async (id) => {
+    try {
+      setError("");
+      await productApi.recoverProduct(id);
+      loadProducts();
+    } catch (err) {
+      console.error("Failed to recover product:", err);
+      setError(err.response?.data?.message || "Failed to recover product");
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Permanently delete this product?")) return;
+    try {
+      setError("");
+      await productApi.deleteProduct(id);
+      loadProducts();
+    } catch (err) {
+      console.error("Failed to delete product:", err);
+      setError(err.response?.data?.message || "Failed to delete product");
+    }
   };
 
   const handleEdit = (id) => {
@@ -78,10 +86,24 @@ export default function Products() {
     navigate("/admin/create-product");
   };
 
-  // pagination üçün hesablamalar
-  const totalPages = Math.max(1, Math.ceil(products.length / perPage));
-  const startIndex = (page - 1) * perPage;
-  const visibleProducts = products.slice(startIndex, startIndex + perPage);
+  const formatDate = (value) => {
+    if (!value) return "-";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return value;
+    return date.toLocaleDateString();
+  };
+
+  const getSubCategoryName = (p) => {
+    return p.subCategoryName || p.subCategory?.name || "-";
+  };
+
+  if (loading) {
+    return (
+      <div className="admin-products-page">
+        <p>Loading products...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="admin-products-page">
@@ -92,121 +114,83 @@ export default function Products() {
         </button>
       </div>
 
+      {error && <div className="error-message">{error}</div>}
+
       {products.length === 0 ? (
-        <p>No products yet.</p>
+        <p className="no-data">No products found.</p>
       ) : (
-        <>
+        <div className="table-wrapper">
           <table className="admin-products-table">
             <thead>
               <tr>
                 <th>ID</th>
-                <th>Name</th>
-                <th>Category</th>
+                <th>Title</th>
                 <th>Price</th>
-                <th>Discount %</th>
-                <th>Qty</th>
-                <th>Year</th>
-                <th>Country</th>
+                <th>Subcategory</th>
+                <th>Image</th>
                 <th>Status</th>
-                <th></th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {visibleProducts.map((p) => (
+              {products.map((p) => (
                 <tr
                   key={p.id}
-                  className={p.isDeleted ? "soft-deleted-row" : ""}
+                  className={`${p.isDeleted ? "soft-deleted-row" : ""} ${!p.isActive && !p.isDeleted ? "inactive-row" : ""}`}
                 >
                   <td>{p.id}</td>
-                  <td>{p.name}</td>
-                  <td>{p.category}</td>
-
-                  {/* PRICE + ENDİRİM GÖSTƏRİLİR */}
+                  <td className="title-cell">{p.title}</td>
+                  <td>{p.price}</td>
+                  <td>{getSubCategoryName(p)}</td>
                   <td>
-                    {p.discountPrice ? (
-                      <>
-                        <span className="admin-old-price">
-                          {p.price?.toLocaleString("ru-RU")} ₽
-                        </span>
-                        <span className="admin-new-price">
-                          {p.discountPrice?.toLocaleString("ru-RU")} ₽
-                        </span>
-                      </>
+                    {p.imageUrl ? (
+                      <div className="thumb inline-thumb">
+                        <img src={p.imageUrl} alt={p.title} />
+                      </div>
                     ) : (
-                      <span>
-                        {p.price?.toLocaleString("ru-RU")} ₽
-                      </span>
+                      "-"
                     )}
                   </td>
-
-                  <td>{p.discountPercent ?? 0}</td>
-                  <td>{p.quantity ?? 0}</td>
-                  <td>{p.year}</td>
-                  <td>{p.country}</td>
-                  <td>{p.isDeleted ? "Soft deleted" : "Active"}</td>
-
+                  <td>
+                    {p.isDeleted && <span className="badge badge-deleted">Deleted</span>}
+                    {!p.isActive && !p.isDeleted && <span className="badge badge-inactive">Inactive</span>}
+                    {p.isActive && !p.isDeleted && <span className="badge badge-active">Active</span>}
+                  </td>
                   <td className="admin-products-actions">
-                    <button
-                      className="edit-btn"
-                      onClick={() => handleEdit(p.id)}
-                    >
-                      Edit
-                    </button>
+                    {!p.isDeleted && (
+                      <>
+                        <button className="edit-btn" onClick={() => handleEdit(p.id)} title="Edit">
+                          Edit
+                        </button>
+                        <button
+                          className={p.isActive ? "deactivate-btn" : "activate-btn"}
+                          onClick={() => handleToggleActive(p)}
+                          title={p.isActive ? "Deactivate" : "Activate"}
+                        >
+                          {p.isActive ? "Deactivate" : "Activate"}
+                        </button>
+                        <button className="soft-del-btn" onClick={() => handleSoftDelete(p.id)} title="Soft Delete">
+                          Soft Delete
+                        </button>
+                      </>
+                    )}
 
-                    <button
-                      className={p.isDeleted ? "revoc-btn" : "soft-del-btn"}
-                      onClick={() => handleSoftToggle(p.id)}
-                    >
-                      {p.isDeleted ? "Revoc" : "Soft delete"}
-                    </button>
-
-                    <button
-                      className="del-btn"
-                      onClick={() => handleDelete(p.id)}
-                    >
-                      Delete
-                    </button>
+                    {p.isDeleted && (
+                      <>
+                        <button className="recover-btn" onClick={() => handleRecover(p.id)} title="Recover">
+                          Recover
+                        </button>
+                        <button className="del-btn" onClick={() => handleDelete(p.id)} title="Delete Permanently">
+                          Delete Permanently
+                        </button>
+                      </>
+                    )}
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-
-          {/* PAGINATION */}
-          {totalPages > 1 && (
-            <div className="admin-products-pagination">
-              <button
-                type="button"
-                onClick={() => setPage((p) => p - 1)}
-                disabled={page === 1}
-              >
-                Prev
-              </button>
-
-              {Array.from({ length: totalPages }).map((_, i) => {
-                const p = i + 1;
-                return (
-                  <button
-                    key={p}
-                    type="button"
-                    className={p === page ? "active" : ""}
-                    onClick={() => setPage(p)}
-                  >
-                    {p}
-                  </button>
-                );
-              })}
-
-              <button
-                type="button"
-                onClick={() => setPage((p) => p + 1)}
-                disabled={page === totalPages}
-              >
-                Next
-              </button>
-            </div>
-          )}
-        </>
+        </div>
       )}
     </div>
   );

@@ -1,26 +1,32 @@
 import { useEffect, useState } from "react";
 import { NavLink, Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
 import "./Navbar.css";
 import logo from "../../assets/images/Logo.png";
-import { getUserCart } from "../../utils/userStorage";
 import { Search, ShoppingBasket, Heart } from "lucide-react";
+import * as wishlistApi from "../../data/wishlistApi";
+import * as orderApi from "../../data/orderApi";
 
 export default function Navbar({ onSearch }) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [dropDown, setDropDown] = useState(false);
-  const [user, setUser] = useState(null);
   const [query, setQuery] = useState("");
   const [cartCount, setCartCount] = useState(0);
+  const [wishlistCount, setWishlistCount] = useState(0);
   const navigate = useNavigate();
+  const { isAuthenticated, userSummary, logout } = useAuth();
 
   useEffect(() => {
-    const calcCartCount = () => {
+    const calcCartCount = async () => {
+      if (!isAuthenticated) {
+        setCartCount(0);
+        return;
+      }
       try {
-        const cart = getUserCart();
-        const count = (cart || []).reduce(
-          (acc, item) => acc + (Number(item?.quantity) || 1),
+        const cart = await orderApi.getCart();
+        const count = (cart.items || []).reduce(
+          (acc, item) => acc + (Number(item?.quantity) || 0),
           0
         );
         setCartCount(count);
@@ -29,16 +35,30 @@ export default function Navbar({ onSearch }) {
       }
     };
 
+    const calcWishlistCount = async () => {
+      if (!isAuthenticated) {
+        setWishlistCount(0);
+        return;
+      }
+      try {
+        const count = await wishlistApi.getWishlistCount();
+        setWishlistCount(count);
+      } catch {
+        setWishlistCount(0);
+      }
+    };
+
     calcCartCount();
+    calcWishlistCount();
 
     window.addEventListener("cartUpdated", calcCartCount);
-    window.addEventListener("storage", calcCartCount);
+    window.addEventListener("wishlistUpdated", calcWishlistCount);
 
     return () => {
       window.removeEventListener("cartUpdated", calcCartCount);
-      window.removeEventListener("storage", calcCartCount);
+      window.removeEventListener("wishlistUpdated", calcWishlistCount);
     };
-  }, []);
+  }, [isAuthenticated]);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -46,34 +66,13 @@ export default function Navbar({ onSearch }) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  useEffect(() => {
-    const syncUser = () => {
-      const storedUser = localStorage.getItem("currentUser");
-      if (storedUser) {
-        setIsLoggedIn(true);
-        setUser(JSON.parse(storedUser));
-      } else {
-        setIsLoggedIn(false);
-        setUser(null);
-      }
-    };
-
-    syncUser();
-    window.addEventListener("storage", syncUser);
-
-    return () => window.removeEventListener("storage", syncUser);
-  }, []);
-
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
   const toggleDropDown = () => setDropDown(!dropDown);
 
   const handleLogout = () => {
-    localStorage.removeItem("currentUser");
-    setIsLoggedIn(false);
-    setUser(null);
+    logout(true);
     setDropDown(false);
-    navigate("/auth/login");
   };
 
   const handleChange = (e) => {
@@ -100,56 +99,69 @@ export default function Navbar({ onSearch }) {
               onChange={handleChange}
             />
             <button className="search-btn">
+              {wishlistCount > 0 && <span className="cart-badge">{wishlistCount}</span>}
               <Search />
             </button>
           </div>
         </div>
 
         <div className="navbar-right">
-          {isLoggedIn && (
+          {isAuthenticated && (
             <Link to="/cart" className="navbar-cart">
               <ShoppingBasket />
               {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
             </Link>
           )}
 
-          {isLoggedIn && (
+          {isAuthenticated && (
             <Link to="/favourite" className="navbar-heart">
               <Heart className="heart-icon" />
             </Link>
           )}
 
-          {!isLoggedIn && (
-            <>
-              <NavLink
-                to="/auth/login"
-                className={({ isActive }) =>
-                  isActive ? "nav-link active" : "nav-link"
-                }
-              >
-                Login
-              </NavLink>
+          {isAuthenticated && userSummary && userSummary.role === 'Admin' && (
+            <NavLink
+              to="/admin"
+              className={({ isActive }) =>
+                isActive ? "nav-link active admin-panel-link" : "nav-link admin-panel-link"
+              }
+            >
+              Admin Panel
+            </NavLink>
+          )}
 
-              <NavLink
-                to="/auth/register"
-                className={({ isActive }) =>
-                  isActive ? "nav-link active" : "nav-link"
-                }
-              >
-                Register
-              </NavLink>
-            </>
+          {!isAuthenticated && (
+            <NavLink
+              to="/auth/login"
+              className={({ isActive }) =>
+                isActive ? "nav-link active" : "nav-link"
+              }
+            >
+              Login
+            </NavLink>
           )}
 
 
-          {isLoggedIn && (
+          {isAuthenticated && userSummary && (
             <div className="avatar-container" onClick={toggleDropDown}>
-              <div className="avatar">
-                {user?.name?.charAt(0).toUpperCase()}
-              </div>
+              {userSummary.imageUrl ? (
+                <img 
+                  src={userSummary.imageUrl} 
+                  alt={userSummary.username} 
+                  className="avatar-image"
+                  style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
+                />
+              ) : (
+                <div className="avatar">
+                  {(userSummary.username || userSummary.fullName)?.charAt(0).toUpperCase()}
+                </div>
+              )}
 
               {dropDown && (
                 <div className="dropdown-menu">
+                  <div className="dropdown-user-info">
+                    {userSummary.fullName || userSummary.username}
+                  </div>
                   <button className="dropdown-item" onClick={handleLogout}>
                     Log out
                   </button>
@@ -164,7 +176,7 @@ export default function Navbar({ onSearch }) {
         </div>
       </div>
 
-      <nav className={`navbar-menu ${menuOpen ? "open" : ""}`}>
+      {/* <nav className={`navbar-menu ${menuOpen ? "open" : ""}`}>
         <NavLink
           to="/wine"
           className={({ isActive }) =>
@@ -200,7 +212,7 @@ export default function Navbar({ onSearch }) {
         >
           Vodka
         </NavLink>
-      </nav>
+      </nav> */}
     </header>
   );
 }

@@ -83,6 +83,8 @@
   align-items: center;
   background: #1c1c1c;
   border-radius: 8px;
+  padding: 20px;
+  gap: 20px;
 }
 
 .favourite-left {
@@ -91,70 +93,136 @@
   align-items: center;
   gap: 20px;
   flex: 1;
+  min-width: 0;
 }
 
 .favourite-item img {
-  width: 90px;
-  height: 130px;
+  width: 120px;
+  height: 160px;
   object-fit: contain;
-  background: black;
-  padding: 5px;
-  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 10px;
+  border-radius: 8px;
+  flex-shrink: 0;
 }
 
 .favourite-info {
-  display: grid;
-  grid-template-columns: 2fr 2fr 1fr;
+  display: flex;
+  flex-direction: row;
   align-items: center;
+  justify-content: space-between;
   width: 100%;
-  padding-left: 10px;
-  column-gap: 40px;
+  gap: 40px;
+}
+
+.favourite-info > div:first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.fav-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .fav-name {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
+  margin-bottom: 4px;
+  color: #ffffff;
+}
+
+.fav-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 14px;
+  color: #bbbbbb;
+  flex-wrap: wrap;
+}
+
+.fav-meta span::after {
+  content: "•";
+  margin-left: 12px;
+  color: #666;
+}
+
+.fav-meta span:last-child::after {
+  content: "";
+  margin-left: 0;
+}
+
+.fav-category {
+  display: inline-block;
+  background: rgba(122, 0, 0, 0.3);
+  color: #ff6b6b;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+  width: fit-content;
+}
+
+.fav-added {
+  font-size: 12px;
+  color: #888;
+  font-style: italic;
 }
 
 .fav-country {
   font-size: 14px;
   color: #bbbbbb;
+  margin-top: 4px;
 }
 
 .fav-price {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
   text-align: right;
+  white-space: nowrap;
+  color: #ffffff;
 }
 
 .favourite-actions {
   display: flex;
   gap: 15px;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .favourite-cart {
   background: #7a0000;
   color: white;
   border: none;
-  padding: 10px 16px;
+  padding: 12px 20px;
   font-weight: 700;
-  font-size: 13px;
+  font-size: 14px;
   cursor: pointer;
   border-radius: 4px;
+  white-space: nowrap;
+  transition: all 0.2s;
 }
 
 .favourite-cart:hover {
   background: #b00000;
+  transform: translateY(-1px);
 }
 
 .favourite-remove {
-  margin-right: 20px;
   background: none;
   border: none;
   color: #d00000;
-  font-size: 20px;
+  font-size: 24px;
   cursor: pointer;
+  padding: 8px;
+  line-height: 1;
+  transition: all 0.2s;
+}
+
+.favourite-remove:hover {
+  color: #ff0000;
+  transform: scale(1.1);
 }
 
 @media (max-width: 1000px) {

@@ -17,14 +17,14 @@
   justify-content: center;
   position: relative;
   will-change: transform;
-  height: 450px;
-  width: 400px;
+  height: 520px;
+  width: 440px;
   padding-bottom: 40px;
 }
 
 .product-left img {
-  width: 320px;
-  height: 450px;
+  width: 360px;
+  height: 520px;
   object-fit: contain;
   display: block;
 }
@@ -36,43 +36,105 @@
   gap: 25px;
 }
 
+.product-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.title-block {
+  display: flex;
+  flex-direction: column;
+  gap: 23px;
+  max-width: 520px;
+}
+
+.title-underline {
+  width: 320px;
+  height: 1px;
+  background: #bdbdbd;
+  opacity: 0.8;
+}
+
 .product-title {
   font-size: 34px;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 1px;
 }
 
 .product-meta {
   font-family: "Inter";
-  font-weight: 600;
-  font-size: 15px;
+  font-weight: 500;
+  font-size: 12px;
   color: #bdbdbd;
   text-transform: uppercase;
+  line-height: 1.4;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.meta-line {
+  display: block;
+}
+
+.meta-primary {
+  letter-spacing: 0.8px;
+}
+
+.meta-secondary {
+  letter-spacing: 0.6px;
+}
+
+.price-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  min-width: 240px;
+  margin-top: 12px;
 }
 
 .product-price {
   font-family: "Inter";
   font-weight: 600;
   text-transform: uppercase;
-  font-size: 26px;
-  margin-top: 10px;
+  font-size: 36px;
+  letter-spacing: 1px;
 }
 
 .buy-row {
   display: flex;
   align-items: center;
-  gap: 15px;
-  margin-top: 10px;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 2px;
 }
 
-.buy-row input {
-  width: 55px;
+.qty-box {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.qty-btn {
+  padding: 6px 10px;
+  border: 1px solid #555;
+  background: transparent;
+  color: white;
+  cursor: pointer;
+}
+
+.qty-input {
+  width: 60px;
   text-align: center;
   font-size: 16px;
   padding: 8px;
   background: #222;
   color: white;
   border: 1px solid #555;
+  font-variant-numeric: tabular-nums;
 }
 
 .buy-btn {
@@ -93,15 +155,22 @@
 .product-stats {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 15px 40px;
+  gap: 28px 28px;
   font-size: 14px;
-  margin-top: 15px;
+  margin-top: 48px;
   font-family: Inter;
 }
 
 .product-stats strong {
   font-weight: 600;
   color: #aaa;
+}
+
+.product-stats div {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  max-width: 360px;
+  line-height: 1.5;
 }
 
 .product-section {
@@ -122,10 +191,13 @@
   color: #ffffff;
   line-height: 1.6;
   text-align: justify;
-  max-width: 90%;
+  max-width: 100%;
+  width: 100%;
   font-family: Inter;
   font-weight: 500;
   font-size: 13px;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 .old-price {

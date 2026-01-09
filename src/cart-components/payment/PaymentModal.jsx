@@ -1,13 +1,13 @@
 import React, { useMemo, useState } from "react";
+import * as orderApi from "../../data/orderApi";
+import * as paymentApi from "../../data/paymentApi";
 import "./PaymentModal.css";
 
 export default function PaymentModal({
   isOpen,
   onClose,
   cartItems = [],
-  subtotal = 0,
-  delivery = 0,
-  total = 0,
+  cartSummary = {},
   onSuccess,
 }) {
   const [form, setForm] = useState({
@@ -15,16 +15,15 @@ export default function PaymentModal({
     phone: "",
     city: "",
     address: "",
-    cardNumber: "",
-    cardExp: "",
-    cardCvv: "",
   });
 
+  const [discountCode, setDiscountCode] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const itemCount = useMemo(
-    () => cartItems.reduce((acc, it) => acc + (Number(it.quantity) || 1), 0),
+    () => cartItems.reduce((acc, it) => acc + (Number(it.quantity) || 0), 0),
     [cartItems]
   );
 
@@ -40,38 +39,46 @@ export default function PaymentModal({
     if (!form.phone.trim()) return "Phone is required";
     if (!form.city.trim()) return "City is required";
     if (!form.address.trim()) return "Address is required";
-
-    const digits = form.cardNumber.replace(/\s/g, "");
-    if (digits.length < 12) return "Card number looks too short";
-    if (!/^\d+$/.test(digits)) return "Card number must be digits only";
-    if (!/^\d{2}\/\d{2}$/.test(form.cardExp.trim())) return "Expiry must be MM/YY";
-    if (!/^\d{3,4}$/.test(form.cardCvv.trim())) return "CVV must be 3 or 4 digits";
-
     return "";
   };
 
-  const handlePay = () => {
+  const handlePay = async () => {
     const msg = validate();
     if (msg) {
       setError(msg);
       return;
     }
 
-    setSuccess("Payment successful ✅ Order placed!");
-    setTimeout(() => {
-      onSuccess?.({
-        customer: {
-          fullName: form.fullName,
-          phone: form.phone,
-          city: form.city,
-          address: form.address,
-        },
-        totals: { subtotal, delivery, total },
-        items: cartItems,
-        createdAt: new Date().toISOString(),
-      });
-      onClose();
-    }, 900);
+    if (loading) return;
+
+    try {
+      setLoading(true);
+      setError("");
+
+      // Create order items array from cart
+      const orderItems = cartItems.map(item => ({
+        productId: item.productId,
+        quantity: item.quantity
+      }));
+
+      console.log("Initiating payment with items:", orderItems);
+      
+      // Initiate payment directly - backend will create order
+      const paymentResponse = await paymentApi.initiatePayment(orderItems, discountCode || "");
+      console.log("Payment response:", paymentResponse);
+      
+      // Redirect to Kapital Bank payment page
+      if (paymentResponse.paymentUrl) {
+        window.location.href = paymentResponse.paymentUrl;
+      } else {
+        throw new Error("Payment URL not received from server");
+      }
+    } catch (err) {
+      console.error("Payment error:", err);
+      console.error("Error details:", err.response?.data);
+      setError(err.response?.data?.message || err.message || "Failed to initiate payment. Please try again.");
+      setLoading(false);
+    }
   };
 
   const stop = (e) => e.stopPropagation();
@@ -126,35 +133,13 @@ export default function PaymentModal({
                   placeholder="Street, building, apartment"
                 />
               </div>
-            </div>
 
-            <h3 style={{ marginTop: 18 }}>Card details</h3>
-
-            <div className="pay-grid">
               <div className="pay-field pay-wide">
-                <label>Card number</label>
+                <label>Discount Code (optional)</label>
                 <input
-                  value={form.cardNumber}
-                  onChange={(e) => setField("cardNumber", e.target.value)}
-                  placeholder="0000 0000 0000 0000"
-                />
-              </div>
-
-              <div className="pay-field">
-                <label>Expiry (MM/YY)</label>
-                <input
-                  value={form.cardExp}
-                  onChange={(e) => setField("cardExp", e.target.value)}
-                  placeholder="12/28"
-                />
-              </div>
-
-              <div className="pay-field">
-                <label>CVV</label>
-                <input
-                  value={form.cardCvv}
-                  onChange={(e) => setField("cardCvv", e.target.value)}
-                  placeholder="123"
+                  value={discountCode}
+                  onChange={(e) => setDiscountCode(e.target.value)}
+                  placeholder="Enter discount code"
                 />
               </div>
             </div>
@@ -173,24 +158,32 @@ export default function PaymentModal({
               </div>
               <div className="pay-line">
                 <span>Subtotal</span>
-                <span>{subtotal.toLocaleString("ru-RU")} Р</span>
+                <span>{(cartSummary.subtotal || 0).toLocaleString("ru-RU")} ₼</span>
+              </div>
+              <div className="pay-line">
+                <span>Discount</span>
+                <span>
+                  {cartSummary.discount > 0 
+                    ? `- ${cartSummary.discount.toLocaleString("ru-RU")} ₼` 
+                    : "0 ₼"}
+                </span>
               </div>
               <div className="pay-line">
                 <span>Delivery</span>
-                <span>{delivery.toLocaleString("ru-RU")} Р</span>
+                <span>{(cartSummary.shippingPrice || 0).toLocaleString("ru-RU")} ₼</span>
               </div>
               <div className="pay-total">
                 <span>Total</span>
-                <span>{total.toLocaleString("ru-RU")} Р</span>
+                <span>{(cartSummary.total || 0).toLocaleString("ru-RU")} ₼</span>
               </div>
             </div>
 
-            <button className="pay-btn" onClick={handlePay}>
-              PAY NOW
+            <button className="pay-btn" onClick={handlePay} disabled={loading}>
+              {loading ? "REDIRECTING TO PAYMENT..." : "PROCEED TO PAYMENT"}
             </button>
 
             <p className="pay-note">
-              * This is a demo checkout. Backend payment integration can be added later.
+              * You will be redirected to Kapital Bank for secure payment.
             </p>
           </div>
         </div>

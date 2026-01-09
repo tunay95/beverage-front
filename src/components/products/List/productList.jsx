@@ -9,6 +9,7 @@ export default function ProductList({
   searchTerm = "",
   products = [],
   title = "",
+  filterOptions,
   showFields = { color: true, sweetness: true, price: true },
 }) {
   const [page, setPage] = useState(1);
@@ -40,11 +41,27 @@ export default function ProductList({
 
   const filteredProducts = useMemo(() => {
     return searchedProducts.filter((p) => {
+      // Category filter
+      const byCategory =
+        !filters.categoryId ||
+        String(p.categoryId) === String(filters.categoryId) ||
+        p.category?.id === filters.categoryId;
+
+      // SubCategory filter
+      const bySubCategory =
+        !filters.subCategoryId ||
+        String(p.subCategoryId) === String(filters.subCategoryId) ||
+        p.subCategory?.id === filters.subCategoryId;
+
+      // Color filter
       const byColor = !filters.color || p.color === filters.color;
+      
+      // Sweetness filter
       const bySweetness = !filters.sweetness || p.sweetness === filters.sweetness;
 
+      // Price filter
       const priceValue =
-        typeof p.discountPrice === "number" && p.discountPrice < p.price
+        typeof p.discountPrice === "number" && p.discountPrice > 0 && p.discountPrice < p.price
           ? p.discountPrice
           : p.price;
 
@@ -52,7 +69,7 @@ export default function ProductList({
         (!filters.minPrice || priceValue >= Number(filters.minPrice)) &&
         (!filters.maxPrice || priceValue <= Number(filters.maxPrice));
 
-      return byColor && bySweetness && byPrice;
+      return byCategory && bySubCategory && byColor && bySweetness && byPrice;
     });
   }, [searchedProducts, filters]);
 
@@ -85,6 +102,7 @@ export default function ProductList({
           title={title}
           onFilterChange={setFilters}
           showFields={showFields}
+          filterOptions={filterOptions}
         />
       </div>
 

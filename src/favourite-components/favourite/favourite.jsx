@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
+import * as wishlistApi from "../../data/wishlistApi";
 
 import {
-  getUserFavorites,
-  setUserFavorites,
   getUserCart,
   setUserCart,
 } from "../../utils/adminStorage";
@@ -11,96 +11,159 @@ import {
 import "./favourite.css";
 
 export default function Favourite() {
-  const [favorites, setFavorites] = useState([]);
+  const [wishlist, setWishlist] = useState([]);
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
-    setFavorites(getUserFavorites());
-  }, []);
+    if (!isAuthenticated) {
+      navigate("/auth/login");
+      return;
+    }
+    loadWishlist();
+  }, [isAuthenticated]);
 
-  const removeFavorite = (id) => {
-    const updated = favorites.filter((item) => item.id !== id);
-    setFavorites(updated);
-    setUserFavorites(updated);
-
-    setMessage("Product removed from favourites");
-    setTimeout(() => setMessage(""), 2000);
+  const loadWishlist = async () => {
+    try {
+      setLoading(true);
+      const data = await wishlistApi.getMyWishlist();
+      console.log("Wishlist data:", data); // Debug
+      setWishlist(data || []);
+    } catch (err) {
+      console.error("Failed to load wishlist:", err);
+      if (err.response?.status === 401) {
+        navigate("/auth/login");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const addToCart = (item) => {
+  const removeFavorite = async (wishlistId) => {
+    try {
+      await wishlistApi.removeFromWishlist(wishlistId);
+      setWishlist((prev) => prev.filter((item) => item.id !== wishlistId));
+      window.dispatchEvent(new Event("wishlistUpdated"));
+
+      setMessage("Product removed from wishlist");
+      setTimeout(() => setMessage(""), 2000);
+    } catch (err) {
+      console.error("Failed to remove from wishlist:", err);
+      setMessage("Failed to remove. Please try again.");
+      setTimeout(() => setMessage(""), 2000);
+    }
+  };
+
+  const addToCart = async (item) => {
     let cart = getUserCart();
 
     const existing = cart.find((x) => x.id === item.id);
     if (existing) {
       existing.quantity += 1;
     } else {
-      cart.push({ ...item, quantity: 1 });
+      cart.push({ 
+        id: item.id,
+        name: item.title,
+        title: item.title,
+        price: item.price,
+        imageUrl: item.imageUrl,
+        quantity: 1 
+      });
     }
 
     setUserCart(cart);
     window.dispatchEvent(new Event("cartUpdated"));
 
-    // FAVOURITE-DƏN AVTOMATİK SİLMƏ
-    const updated = favorites.filter((f) => f.id !== item.id);
-    setFavorites(updated);
-    setUserFavorites(updated);
+    // Remove from wishlist after adding to cart
+    try {
+      await wishlistApi.removeFromWishlist(item.id);
+      setWishlist((prev) => prev.filter((f) => f.id !== item.id));
+      window.dispatchEvent(new Event("wishlistUpdated"));
 
-    // MESAJ
-    setMessage(`${item.name} added to cart`);
-    setTimeout(() => setMessage(""), 2000);
+      setMessage(`${item.title} added to cart`);
+      setTimeout(() => setMessage(""), 2000);
+    } catch (err) {
+      console.error("Failed to remove from wishlist:", err);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="favourite-page">
+        <h2 className="favourite-title">Wishlist</h2>
+        <p className="favourite-empty">Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="favourite-page">
-      <h2 className="favourite-title">Favourite</h2>
+      <h2 className="favourite-title">Wishlist</h2>
 
-      {/* 🔴 MESAJ BURADA OLMALIDIR – səhifənin yuxarısında */}
       {message && <div className="favourite-message">{message}</div>}
 
-      {favorites.length === 0 ? (
-        <p className="favourite-empty">Favourite list is empty...</p>
+      {wishlist.length === 0 ? (
+        <p className="favourite-empty">Wishlist is empty...</p>
       ) : (
         <div className="favourite-list">
-          {favorites.map((item) => {
+          {wishlist.map((item) => {
+            const price = item.price || 0;
+            const discountPrice = item.discountPrice;
             const hasDiscount =
-              item.discountPrice &&
-              typeof item.discountPrice === "number" &&
-              item.discountPrice < item.price;
+              discountPrice &&
+              typeof discountPrice === "number" &&
+              discountPrice > 0 &&
+              discountPrice < price;
+
+            const year = item.prodDate ? new Date(item.prodDate).getFullYear() : "";
+            const addedDate = item.addedToWishlistOn 
+              ? new Date(item.addedToWishlistOn).toLocaleDateString("en-GB", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric"
+                })
+              : "";
 
             return (
               <div key={item.id} className="favourite-item">
                 <div className="favourite-left">
                   <img
                     src={item.imageUrl}
-                    alt={item.name}
-                    onClick={() => navigate(`/${item.category}/${item.id}`)}
+                    alt={item.title}
+                    onClick={() => navigate(`/wine/${item.id}`)}
                     style={{ cursor: "pointer" }}
                   />
 
                   <div className="favourite-info">
-                    <div>
-                      <div className="fav-name">{item.name}</div>
-                      <div className="fav-country">
-                        {item.year} / {item.volume || "0.75 L"} •{" "}
-                        {item.country || "FRANCE"}
+                    <div className="fav-details">
+                      <div className="fav-name">{item.title}</div>
+                      <div className="fav-meta">
+                        {year && <span>{year}</span>}
+                        {item.liter && <span>{item.liter} L</span>}
+                        {item.location && <span>{item.location}</span>}
                       </div>
+                      {item.subCategoryName && (
+                        <div className="fav-category">{item.subCategoryName}</div>
+                      )}
+                      {addedDate && (
+                        <div className="fav-added">Added: {addedDate}</div>
+                      )}
                     </div>
-
-                    <div></div>
 
                     <div className="fav-price">
                       {hasDiscount ? (
                         <>
                           <span className="old-price">
-                            {item.price.toLocaleString("ru-RU")} Р
+                            {price.toLocaleString("ru-RU")} ₼
                           </span>
                           <span className="discount-price">
-                            {item.discountPrice.toLocaleString("ru-RU")} Р
+                            {discountPrice.toLocaleString("ru-RU")} ₼
                           </span>
                         </>
                       ) : (
-                        <span>{item.price.toLocaleString("ru-RU")} Р</span>
+                        <span>{price.toLocaleString("ru-RU")} ₼</span>
                       )}
                     </div>
                   </div>
