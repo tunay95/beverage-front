@@ -17,15 +17,18 @@ export default function Cart() {
   });
 
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading: authLoading } = useAuth();
 
   useEffect(() => {
+    // Wait for auth to finish loading before checking authentication
+    if (authLoading) return;
+    
     if (!isAuthenticated) {
       navigate("/auth/login");
       return;
     }
     loadCart();
-  }, [isAuthenticated]);
+  }, [isAuthenticated, authLoading]);
 
   const loadCart = async () => {
     try {
@@ -168,15 +171,6 @@ export default function Cart() {
           </div>
 
           <div className="summary-line">
-            <span>Discount</span>
-            <span>
-              {cartSummary.discount > 0
-                ? `- ${cartSummary.discount.toLocaleString("ru-RU")} ₼`
-                : "0 ₼"}
-            </span>
-          </div>
-
-          <div className="summary-line">
             <span>Delivery</span>
             <span>{cartSummary.shippingPrice.toLocaleString("ru-RU")} ₼</span>
           </div>
@@ -185,7 +179,7 @@ export default function Cart() {
 
           <div className="summary-total">
             <span>For payment</span>
-            <span>{cartSummary.total.toLocaleString("ru-RU")} ₼</span>
+            <span>{(cartSummary.subtotal + cartSummary.shippingPrice).toLocaleString("ru-RU")} ₼</span>
           </div>
 
           <button className="checkout-btn" onClick={openCheckout}>

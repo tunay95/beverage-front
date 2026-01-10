@@ -27,6 +27,7 @@ import AdminSlides from "./admin/admin-pages/Slides/Slides";
 import CreateFilter from "./admin/admin-pages/CreateFilter/CreateFilter";
 import NotAuthorized from "./admin/admin-pages/NotAuthorized/NotAuthorized";
 import Subscribers from "./admin/admin-pages/Subscribers/Subscribers";
+import Transactions from "./admin/admin-pages/Transactions/Transactions";
 
 export default function AppRoutes() {
   return (
@@ -67,6 +68,7 @@ export default function AppRoutes() {
           <Route path="create-filter" element={<CreateFilter />} />
 
           <Route path="subscribers" element={<Subscribers />} />
+          <Route path="transactions" element={<Transactions />} />
         </Route>
       </Route>
 

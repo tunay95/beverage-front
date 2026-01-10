@@ -1,6 +1,6 @@
 import Slider from "../components/slider/slider";
 import ProductList from "../components/products/List/productList";
-import WineSommelier from "../wine-components/wine-sommelier/wine-sommelier";
+import WineSommelier from "../wine-sommelier/wine-sommelier";
 import AboutSommelier from "../components/sommelier-section/aboutSommelier";
 
 import { useOutletContext } from "react-router-dom";

@@ -222,68 +222,70 @@ export default function AdminProductDetails() {
         {details.length === 0 && <p className="no-data">No product details found.</p>}
 
         {details.length > 0 && (
-          <table className="category-table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Product</th>
-                <th>Title</th>
-                <th>Description</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {details.map((detail) => (
-                <tr
-                  key={detail.id}
-                  className={`${detail.isDeleted ? 'deleted-row' : ''} ${!detail.isActive && !detail.isDeleted ? 'inactive-row' : ''}`}
-                >
-                  <td>{detail.id}</td>
-                  <td className="category-name">
-                    {detail.productTitle || productMap[detail.productId] || `#${detail.productId}`}
-                  </td>
-                  <td className="category-name">{detail.title}</td>
-                  <td className="category-description">{detail.description || '-'}</td>
-                  <td>
-                    {detail.isDeleted && <span className="badge badge-deleted">Deleted</span>}
-                    {!detail.isActive && !detail.isDeleted && <span className="badge badge-inactive">Inactive</span>}
-                    {detail.isActive && !detail.isDeleted && <span className="badge badge-active">Active</span>}
-                  </td>
-                  <td className="action-cell">
-                    {!detail.isDeleted && (
-                      <>
-                        <button className="btn-edit" onClick={() => handleEdit(detail)} title="Edit">
-                          Edit
-                        </button>
-                        <button
-                          className={detail.isActive ? "btn-deactivate" : "btn-activate"}
-                          onClick={() => handleToggleActive(detail)}
-                          title={detail.isActive ? "Deactivate" : "Activate"}
-                        >
-                          {detail.isActive ? "Deactivate" : "Activate"}
-                        </button>
-                        <button className="btn-soft-delete" onClick={() => handleSoftDelete(detail.id)} title="Soft Delete">
-                          Soft Delete
-                        </button>
-                      </>
-                    )}
-
-                    {detail.isDeleted && (
-                      <>
-                        <button className="btn-recover" onClick={() => handleRecover(detail.id)} title="Recover">
-                          Recover
-                        </button>
-                        <button className="btn-delete" onClick={() => handleDelete(detail.id)} title="Delete Permanently">
-                          Delete Permanently
-                        </button>
-                      </>
-                    )}
-                  </td>
+          <div className="table-wrapper">
+            <table className="category-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Product</th>
+                  <th>Title</th>
+                  <th>Description</th>
+                  <th>Status</th>
+                  <th>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {details.map((detail) => (
+                  <tr
+                    key={detail.id}
+                    className={`${detail.isDeleted ? 'deleted-row' : ''} ${!detail.isActive && !detail.isDeleted ? 'inactive-row' : ''}`}
+                  >
+                    <td>{detail.id}</td>
+                    <td className="category-name">
+                      {detail.productTitle || productMap[detail.productId] || `#${detail.productId}`}
+                    </td>
+                    <td className="category-name">{detail.title}</td>
+                    <td className="category-description">{detail.description || '-'}</td>
+                    <td>
+                      {detail.isDeleted && <span className="badge badge-deleted">Deleted</span>}
+                      {!detail.isActive && !detail.isDeleted && <span className="badge badge-inactive">Inactive</span>}
+                      {detail.isActive && !detail.isDeleted && <span className="badge badge-active">Active</span>}
+                    </td>
+                    <td className="action-cell">
+                      {!detail.isDeleted && (
+                        <>
+                          <button className="btn-edit" onClick={() => handleEdit(detail)} title="Edit">
+                            Edit
+                          </button>
+                          <button
+                            className={detail.isActive ? "btn-deactivate" : "btn-activate"}
+                            onClick={() => handleToggleActive(detail)}
+                            title={detail.isActive ? "Deactivate" : "Activate"}
+                          >
+                            {detail.isActive ? "Deactivate" : "Activate"}
+                          </button>
+                          <button className="btn-soft-delete" onClick={() => handleSoftDelete(detail.id)} title="Soft Delete">
+                            Soft Delete
+                          </button>
+                        </>
+                      )}
+
+                      {detail.isDeleted && (
+                        <>
+                          <button className="btn-recover" onClick={() => handleRecover(detail.id)} title="Recover">
+                            Recover
+                          </button>
+                          <button className="btn-delete" onClick={() => handleDelete(detail.id)} title="Delete Permanently">
+                            Delete Permanently
+                          </button>
+                        </>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>

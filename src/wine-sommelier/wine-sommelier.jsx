@@ -1,6 +1,6 @@
 import "./wine-sommelier.css";
-import sommelier from "../../assets/images/sommelier2.jpg";
-import overlayShape from "../../assets/images/Vector 6.png";
+import sommelier from "../assets/images/sommelier2.jpg";
+import overlayShape from "../assets/images/Vector 6.png";
 
 export default function WineSommelier() {
   return (

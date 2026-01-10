@@ -22,10 +22,37 @@ export default function PaymentModal({
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Available discount codes (static)
+  const DISCOUNT_CODES = {
+    "SAVE10": 10,
+    "SAVE50": 50,
+    "WINE100": 100
+  };
+
   const itemCount = useMemo(
     () => cartItems.reduce((acc, it) => acc + (Number(it.quantity) || 0), 0),
     [cartItems]
   );
+
+  // Calculate discount dynamically
+  const calculatedDiscount = useMemo(() => {
+    const code = discountCode.trim().toUpperCase();
+    return DISCOUNT_CODES[code] || 0;
+  }, [discountCode]);
+
+  // Calculate dynamic total
+  const dynamicTotal = useMemo(() => {
+    const subtotal = cartSummary.subtotal || 0;
+    const shipping = cartSummary.shippingPrice || 100;
+    return subtotal - calculatedDiscount + shipping;
+  }, [cartSummary, calculatedDiscount]);
+
+  // Check if discount code is valid
+  const isValidCode = useMemo(() => {
+    if (!discountCode.trim()) return null;
+    const code = discountCode.trim().toUpperCase();
+    return DISCOUNT_CODES[code] !== undefined;
+  }, [discountCode]);
 
   if (!isOpen) return null;
 
@@ -55,19 +82,36 @@ export default function PaymentModal({
       setLoading(true);
       setError("");
 
-      // Create order items array from cart
+      // Step 1: Create order from cart (without discount)
       const orderItems = cartItems.map(item => ({
         productId: item.productId,
         quantity: item.quantity
       }));
 
-      console.log("Initiating payment with items:", orderItems);
+      console.log("Creating order with items:", orderItems);
+      // Don't send discountCode to order endpoint - it expects decimal
+      const orderResponse = await orderApi.placeOrder(orderItems);
+      console.log("Order created:", orderResponse);
       
-      // Initiate payment directly - backend will create order
-      const paymentResponse = await paymentApi.initiatePayment(orderItems, discountCode || "");
+      // Step 2: Initiate payment with orderId and discount code
+      const orderId = orderResponse.id || orderResponse.orderId;
+      const finalDiscountCode = discountCode.trim() || null;
+      console.log("Initiating payment for orderId:", orderId, "with discount:", finalDiscountCode);
+      const paymentResponse = await paymentApi.initiatePayment(
+        orderId, 
+        finalDiscountCode
+      );
       console.log("Payment response:", paymentResponse);
       
-      // Redirect to Kapital Bank payment page
+      // Save payment data to localStorage for callback verification
+      localStorage.setItem('pendingPayment', JSON.stringify({
+        orderId: orderId,
+        transactionId: paymentResponse.transactionId,
+        amount: paymentResponse.amount,
+        timestamp: new Date().toISOString()
+      }));
+      
+      // Step 3: Redirect to Kapital Bank payment page
       if (paymentResponse.paymentUrl) {
         window.location.href = paymentResponse.paymentUrl;
       } else {
@@ -138,9 +182,25 @@ export default function PaymentModal({
                 <label>Discount Code (optional)</label>
                 <input
                   value={discountCode}
-                  onChange={(e) => setDiscountCode(e.target.value)}
+                  onChange={(e) => {
+                    setDiscountCode(e.target.value.toUpperCase());
+                    setError("");
+                  }}
                   placeholder="Enter discount code"
+                  style={{
+                    borderColor: isValidCode === true ? '#4CAF50' : isValidCode === false ? '#f44336' : undefined
+                  }}
                 />
+                {isValidCode === true && (
+                  <p style={{ color: '#4CAF50', fontSize: '12px', marginTop: '4px' }}>
+                    ✓ {calculatedDiscount}₼ discount will be applied
+                  </p>
+                )}
+                {isValidCode === false && (
+                  <p style={{ color: '#f44336', fontSize: '12px', marginTop: '4px' }}>
+                    ✗ Invalid code. Available: SAVE10, SAVE50, WINE100
+                  </p>
+                )}
               </div>
             </div>
 
@@ -163,18 +223,18 @@ export default function PaymentModal({
               <div className="pay-line">
                 <span>Discount</span>
                 <span>
-                  {cartSummary.discount > 0 
-                    ? `- ${cartSummary.discount.toLocaleString("ru-RU")} ₼` 
+                  {calculatedDiscount > 0 
+                    ? `- ${calculatedDiscount.toLocaleString("ru-RU")} ₼` 
                     : "0 ₼"}
                 </span>
               </div>
               <div className="pay-line">
                 <span>Delivery</span>
-                <span>{(cartSummary.shippingPrice || 0).toLocaleString("ru-RU")} ₼</span>
+                <span>{(cartSummary.shippingPrice || 100).toLocaleString("ru-RU")} ₼</span>
               </div>
               <div className="pay-total">
                 <span>Total</span>
-                <span>{(cartSummary.total || 0).toLocaleString("ru-RU")} ₼</span>
+                <span>{dynamicTotal.toLocaleString("ru-RU")} ₼</span>
               </div>
             </div>
 

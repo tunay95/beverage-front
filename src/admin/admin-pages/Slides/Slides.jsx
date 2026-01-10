@@ -182,7 +182,8 @@ export default function AdminSlides() {
         {slides.length === 0 && <p className="no-data">No slides found.</p>}
 
         {slides.length > 0 && (
-          <table className="category-table">
+          <div className="table-wrapper">
+            <table className="category-table">
             <thead>
               <tr>
                 <th>ID</th>
@@ -238,6 +239,7 @@ export default function AdminSlides() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </div>

@@ -2,9 +2,9 @@ import apiClient from './apiClient';
 
 // Initiate payment with Kapital Bank
 // Backend will create order and initiate payment
-export const initiatePayment = async (items, discountCode = "") => {
+export const initiatePayment = async (orderId, discountCode = null) => {
   const response = await apiClient.post('/api/payments/initiate', {
-    items,
+    orderId,
     discountCode
   });
   return response.data;

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import * as paymentApi from "../data/paymentApi";
+import * as orderApi from "../data/orderApi";
 import "./PaymentCallback.css";
 
 export default function PaymentCallback() {
@@ -16,26 +17,57 @@ export default function PaymentCallback() {
 
   const handleCallback = async () => {
     try {
-      // Get parameters from URL
-      const providerTransactionId = searchParams.get("transactionId");
-      const paymentStatus = searchParams.get("status");
+      // Get saved payment data from localStorage
+      const savedPaymentData = localStorage.getItem('pendingPayment');
+      let pendingPayment = null;
+      
+      if (savedPaymentData) {
+        try {
+          pendingPayment = JSON.parse(savedPaymentData);
+          console.log("Found pending payment:", pendingPayment);
+        } catch (e) {
+          console.error("Failed to parse pending payment:", e);
+        }
+      }
 
-      if (!providerTransactionId || !paymentStatus) {
+      // Get parameters from URL (Kapital Bank sends these)
+      const providerTransactionId = searchParams.get("id") || searchParams.get("transactionId") || pendingPayment?.transactionId;
+      const paymentStatus = searchParams.get("status") || "COMPLETED";
+
+      console.log("Payment callback params:", { providerTransactionId, paymentStatus, pendingPayment });
+
+      if (!providerTransactionId) {
         setStatus("failed");
-        setMessage("Invalid payment callback parameters");
+        setMessage("Invalid payment callback - missing transaction ID");
         setLoading(false);
         return;
       }
 
-      // Call backend to verify and process payment
-      const response = await paymentApi.handlePaymentCallback(
-        providerTransactionId,
-        paymentStatus
-      );
+      // Step 1: Send callback to backend for verification
+      console.log("Sending callback to backend...");
+      const callbackResponse = await paymentApi.handlePaymentCallback(providerTransactionId, paymentStatus);
+      console.log("Callback response:", callbackResponse);
+      
+      // Step 2: Check payment status to confirm
+      console.log("Checking payment status...");
+      const statusResponse = await paymentApi.getPaymentStatus(providerTransactionId);
+      console.log("Payment status response:", statusResponse);
 
-      if (response.success) {
+      // Step 3: Handle based on status
+      if (statusResponse.status === "FULLYPAID") {
         setStatus("success");
         setMessage("Payment completed successfully!");
+        
+        // Clear pending payment from localStorage
+        localStorage.removeItem('pendingPayment');
+        
+        // Step 4: Clear cart on successful payment
+        try {
+          await orderApi.clearCart();
+          console.log("Cart cleared successfully");
+        } catch (err) {
+          console.error("Failed to clear cart:", err);
+        }
         
         // Trigger cart update event
         window.dispatchEvent(new Event("cartUpdated"));
@@ -44,9 +76,17 @@ export default function PaymentCallback() {
         setTimeout(() => {
           navigate("/");
         }, 3000);
+      } else if (statusResponse.status === "ONPAYMENT") {
+        setStatus("processing");
+        setMessage("Payment is still processing. Please check back later.");
+        setTimeout(() => {
+          navigate("/cart");
+        }, 5000);
       } else {
+        // Clear pending payment on failure
+        localStorage.removeItem('pendingPayment');
         setStatus("failed");
-        setMessage(response.message || "Payment failed");
+        setMessage(`Payment failed with status: ${statusResponse.status}`);
       }
     } catch (err) {
       console.error("Payment callback error:", err);

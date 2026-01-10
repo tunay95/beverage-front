@@ -186,3 +186,137 @@
   font-weight: 700;
   margin-bottom: 14px;
 }
+
+/* Mobile Menu Toggle */
+.mobile-menu-toggle {
+  display: none;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+  padding: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mobile-menu-toggle:hover {
+  background: linear-gradient(135deg, #7A0000 0%, #a80000 100%);
+  transform: scale(1.05);
+}
+
+.mobile-menu-toggle svg {
+  display: block;
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 1024px) {
+  .admin-sidebar {
+    width: 220px;
+    padding: 20px 16px;
+  }
+
+  .admin-header {
+    padding: 0 20px;
+  }
+
+  .admin-content {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-layout {
+    flex-direction: column;
+  }
+
+  .admin-sidebar {
+    position: fixed;
+    top: 0;
+    left: -100%;
+    width: 280px;
+    height: 100vh;
+    z-index: 1000;
+    transition: left 0.3s ease;
+    overflow-y: auto;
+  }
+
+  .admin-sidebar.mobile-open {
+    left: 0;
+    box-shadow: 8px 0 32px rgba(0, 0, 0, 0.5);
+  }
+
+  .mobile-menu-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .admin-header {
+    height: 64px;
+    padding: 0 16px;
+  }
+
+  .admin-header-left {
+    gap: 12px;
+  }
+
+  .admin-home-link {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+
+  .admin-home-link span {
+    display: none;
+  }
+
+  .admin-user-info {
+    padding: 6px 10px;
+    gap: 8px;
+  }
+
+  .admin-user-avatar {
+    width: 36px;
+    height: 36px;
+  }
+
+  .admin-user-text {
+    display: none;
+  }
+
+  .admin-logout {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+
+  .admin-content {
+    padding: 16px;
+  }
+
+  .admin-card-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-header {
+    height: 56px;
+    padding: 0 12px;
+  }
+
+  .admin-header-right {
+    gap: 8px;
+  }
+
+  .admin-logout {
+    padding: 6px 10px;
+    font-size: 13px;
+  }
+
+  .admin-content {
+    padding: 12px;
+  }
+
+  .admin-sidebar {
+    width: 260px;
+  }
+}

@@ -1,9 +1,9 @@
 import { useAuth } from "../hooks/useAuth";
 import { Link } from "react-router-dom";
-import { Home } from "lucide-react";
+import { Home, Menu } from "lucide-react";
 import "./admin.css";
 
-export default function AdminHeader() {
+export default function AdminHeader({ onMenuToggle }) {
     const { userSummary, logout } = useAuth();
 
     const handleLogout = () => {
@@ -13,6 +13,9 @@ export default function AdminHeader() {
     return (
         <header className="admin-header">
             <div className="admin-header-left">
+                <button className="mobile-menu-toggle" onClick={onMenuToggle}>
+                    <Menu size={24} />
+                </button>
                 <Link 
                     className="admin-home-link" 
                     to="/"

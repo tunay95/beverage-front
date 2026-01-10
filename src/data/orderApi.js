@@ -35,7 +35,7 @@ export const clearCart = async () => {
 
 // === ORDER OPERATIONS ===
 
-export const placeOrder = async (items, discountCode = 0) => {
+export const placeOrder = async (items, discountCode = null) => {
   const response = await apiClient.post('/api/orders', {
     items,
     discountCode
