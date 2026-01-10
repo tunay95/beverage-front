@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import * as orderApi from "../../data/orderApi";
 import PaymentModal from "../payment/PaymentModal";
-import "./cart.css";
+import "./Cart.css";
 
 export default function Cart() {
   const [cartItems, setCartItems] = useState([]);
