@@ -2,24 +2,26 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./fav-recommend.css";
 import { Heart } from "lucide-react";
+import * as orderApi from "../../data/orderApi";
+import { useAuth } from "../../hooks/useAuth";
 
 import {
   getUserFavorites,
   setUserFavorites,
-  getUserCart,
-  setUserCart,
   getAdminProducts,
 } from "../../utils/adminStorage";
 import baseProducts from "../../data/products";
 
 export default function FavRecommend() {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
   const [message, setMessage] = useState("");
   const [itemsPerPage, setItemsPerPage] = useState(3);
   const [currentPage, setCurrentPage] = useState(0);
   const [recommendedProducts, setRecommendedProducts] = useState([]);
   const [mainCategory, setMainCategory] = useState("wine");
+  const [cartLoading, setCartLoading] = useState(false);
 
   useEffect(() => {
     try {
@@ -89,24 +91,34 @@ export default function FavRecommend() {
     setTimeout(() => setMessage(""), 2000);
   };
 
-  const handleAddToCart = (e, product) => {
+  const handleAddToCart = async (e, product) => {
     e.preventDefault();
     e.stopPropagation();
 
-    let cart = getUserCart();
-    const existing = cart.find((item) => item.id === product.id);
-
-    if (existing) {
-      existing.quantity += 1;
-    } else {
-      cart.push({ ...product, quantity: 1 });
+    if (!isAuthenticated) {
+      navigate("/auth/login");
+      return;
     }
 
-    setUserCart(cart);
-    window.dispatchEvent(new Event("cartUpdated"));
+    if (cartLoading) return;
 
-    setMessage(`${product.name} added to cart!`);
-    setTimeout(() => setMessage(""), 2000);
+    try {
+      setCartLoading(true);
+      await orderApi.addToCart(product.id, 1);
+      window.dispatchEvent(new Event("cartUpdated"));
+
+      setMessage(`${product.name} added to cart!`);
+    } catch (err) {
+      console.error("Cart error:", err);
+      if (err.response?.status === 401) {
+        navigate("/auth/login");
+      } else {
+        setMessage("Failed to add to cart. Please try again.");
+      }
+    } finally {
+      setCartLoading(false);
+      setTimeout(() => setMessage(""), 2000);
+    }
   };
 
   const handleViewAll = () => {

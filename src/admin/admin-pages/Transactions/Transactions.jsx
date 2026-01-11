@@ -242,7 +242,7 @@ export default function Transactions() {
                   <th>Status</th>
                   <th>Provider</th>
                   <th>Transaction ID</th>
-                  <th>Created At</th>
+                  <th>Date & Time</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -263,7 +263,18 @@ export default function Transactions() {
                     </td>
                     <td>{transaction.paymentProvider}</td>
                     <td className="transaction-id">{transaction.providerTransactionId}</td>
-                    <td>{new Date(transaction.createdAt).toLocaleString()}</td>
+                    <td>
+                      {transaction.createdAt ? (
+                        <div style={{ fontSize: '13px' }}>
+                          <div>{new Date(transaction.createdAt).toLocaleDateString('az-AZ')}</div>
+                          <div style={{ color: '#999', fontSize: '12px' }}>
+                            {new Date(transaction.createdAt).toLocaleTimeString('az-AZ', { hour: '2-digit', minute: '2-digit' })}
+                          </div>
+                        </div>
+                      ) : (
+                        <div>-</div>
+                      )}
+                    </td>
                     <td>
                       <select
                         className="status-select"

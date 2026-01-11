@@ -1,132 +1,154 @@
-import React, { useState, useEffect, useMemo } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import "./recommended.css";
-import { Heart } from "lucide-react";
+import { Heart, ChevronLeft, ChevronRight } from "lucide-react";
+import * as orderApi from "../../data/orderApi";
+import * as productApi from "../../data/productApi";
+import * as wishlistApi from "../../data/wishlistApi";
+import { useAuth } from "../../hooks/useAuth";
 
-import {
-  getUserCart,
-  setUserCart,
-  getUserFavorites,
-  setUserFavorites,
-  getAdminProducts,
-} from "../../utils/adminStorage";
-import baseProducts from "../../data/products";
-
-export default function Recommended() {
-  const { category } = useParams();
+export default function Recommended({ subCategoryId, currentProductId }) {
   const navigate = useNavigate();
-
-  const [isLoggedIn, setIsLoggedIn] = useState(
-    !!localStorage.getItem("currentUser")
-  );
+  const { isAuthenticated } = useAuth();
+  const sliderRef = useRef(null);
 
   const [message, setMessage] = useState("");
-  const [currentPage, setCurrentPage] = useState(0);
-  const [itemsPerPage, setItemsPerPage] = useState(3);
+  const [recommendedProducts, setRecommendedProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [cartLoading, setCartLoading] = useState(false);
+  const [cardsPerView, setCardsPerView] = useState(4);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [showArrows, setShowArrows] = useState(false);
 
+  // Handle responsive card count
   useEffect(() => {
-    const syncLogin = () => {
-      setIsLoggedIn(!!localStorage.getItem("currentUser"));
+    const handleResize = () => {
+      const width = window.innerWidth;
+      if (width < 600) {
+        setCardsPerView(1);
+      } else if (width < 1000) {
+        setCardsPerView(2);
+      } else if (width < 1400) {
+        setCardsPerView(3);
+      } else {
+        setCardsPerView(4);
+      }
     };
-    window.addEventListener("storage", syncLogin);
-    return () => window.removeEventListener("storage", syncLogin);
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const requireLogin = () => {
-    if (!isLoggedIn) {
+  // Update showArrows when cardsPerView or products change
+  useEffect(() => {
+    setShowArrows(cardsPerView < recommendedProducts.length);
+  }, [cardsPerView, recommendedProducts.length]);
+
+  // Fetch products from backend API filtered by subcategory
+  useEffect(() => {
+    const fetchRecommendedProducts = async () => {
+      try {
+        setLoading(true);
+        const allProducts = await productApi.getAllActiveProducts();
+        
+        // Filter by same subcategory, exclude current product, max 4 products
+        const filtered = allProducts
+          .filter(p => 
+            p.subCategoryId === subCategoryId && 
+            p.id !== currentProductId
+          )
+          .slice(0, 4);
+        
+        setRecommendedProducts(filtered);
+      } catch (err) {
+        console.error("Failed to fetch recommended products:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (subCategoryId) {
+      fetchRecommendedProducts();
+    }
+  }, [subCategoryId, currentProductId]);
+
+  // Slider navigation functions
+  const handlePrevious = () => {
+    if (activeIndex > 0) {
+      setActiveIndex(activeIndex - 1);
+    }
+  };
+
+  const handleNext = () => {
+    const maxIndex = recommendedProducts.length - cardsPerView;
+    if (activeIndex < maxIndex) {
+      setActiveIndex(activeIndex + 1);
+    }
+  };
+
+  // Reset activeIndex when cards per view changes
+  useEffect(() => {
+    setActiveIndex(0);
+  }, [cardsPerView]);
+
+  const handleAddToFavorite = async (e, product) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!isAuthenticated) {
       navigate("/auth/login");
-      return false;
+      return;
     }
-    return true;
-  };
 
-  const normalizedCategory = category === "home" ? "wine" : category;
-
-  // Məhsulları admin-dən oxuyuruq (fallback: baseProducts)
-  const recommendedProducts = useMemo(() => {
-    const admin = getAdminProducts();
-    const source = admin && admin.length > 0 ? admin : baseProducts;
-
-    return source
-      .filter(
-        (p) =>
-          p.category === normalizedCategory &&
-          !p.isDeleted
-      )
-      .slice(0, 12);
-  }, [normalizedCategory]);
-
-  // ekran ölçüsünə görə neçə kart
-  useEffect(() => {
-    const update = () => {
-      if (window.innerWidth <= 550) setItemsPerPage(1);
-      else if (window.innerWidth <= 1250) setItemsPerPage(2);
-      else if (window.innerWidth >= 1600) setItemsPerPage(4);
-      else setItemsPerPage(3);
-    };
-
-    update();
-    window.addEventListener("resize", update);
-    return () => window.removeEventListener("resize", update);
-  }, []);
-
-  const handleAddToFavorite = (e, product) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (!requireLogin()) return;
-
-    const favorites = getUserFavorites();
-
-    if (!favorites.find((x) => x.id === product.id)) {
-      const updated = [...favorites, product];
-      setUserFavorites(updated);
-      setMessage(`${product.name} added to favorites!`);
-    } else {
-      setMessage(`${product.name} is already in favorites`);
+    try {
+      await wishlistApi.addToWishlist(product.id);
+      window.dispatchEvent(new Event("wishlistUpdated"));
+      setMessage(`${product.title || product.name} added to wishlist!`);
+    } catch (err) {
+      console.error("Wishlist error:", err);
+      setMessage("Failed to add to wishlist.");
     }
 
     setTimeout(() => setMessage(""), 2000);
   };
 
-  const handleAddToCart = (e, product) => {
+  const handleAddToCart = async (e, product) => {
     e.preventDefault();
     e.stopPropagation();
 
-    if (!requireLogin()) return;
-
-    let cart = getUserCart();
-    const existing = cart.find((item) => item.id === product.id);
-
-    if (existing) {
-      existing.quantity += 1;
-    } else {
-      cart.push({ ...product, quantity: 1 });
+    if (!isAuthenticated) {
+      navigate("/auth/login");
+      return;
     }
 
-    setUserCart(cart);
-    window.dispatchEvent(new Event("cartUpdated"));
+    if (cartLoading) return;
 
-    setMessage(`${product.name} added to cart!`);
-    setTimeout(() => setMessage(""), 2000);
+    try {
+      setCartLoading(true);
+      await orderApi.addToCart(product.id, 1);
+      window.dispatchEvent(new Event("cartUpdated"));
+
+      setMessage(`${product.name} added to cart!`);
+    } catch (err) {
+      console.error("Cart error:", err);
+      if (err.response?.status === 401) {
+        navigate("/auth/login");
+      } else {
+        setMessage("Failed to add to cart. Please try again.");
+      }
+    } finally {
+      setCartLoading(false);
+      setTimeout(() => setMessage(""), 2000);
+    }
   };
 
   const handleViewAll = () => {
-    if (!normalizedCategory) {
-      navigate("/");
-    } else {
-      navigate(`/${normalizedCategory}`);
-    }
+    navigate("/");
   };
 
+  if (loading) return null;
   if (!recommendedProducts.length) return null;
-
-  const totalPages = Math.ceil(recommendedProducts.length / itemsPerPage);
-  const start = currentPage * itemsPerPage;
-  const visible = recommendedProducts.slice(start, start + itemsPerPage);
-
-  const next = () => setCurrentPage((p) => (p + 1) % totalPages);
-  const prev = () => setCurrentPage((p) => (p - 1 + totalPages) % totalPages);
 
   return (
     <div className="recommended-section">
@@ -134,15 +156,28 @@ export default function Recommended() {
 
       {message && <div className="fav-message">{message}</div>}
 
-      <div className="slider-wrapper">
-        {totalPages > 1 && (
-          <button className="arrow left" onClick={prev}>
-            ❮
+      <div className="slider-container">
+        {showArrows && (
+          <button
+            className="arrow arrow-left"
+            onClick={handlePrevious}
+            disabled={activeIndex === 0}
+            aria-label="Previous"
+          >
+            <ChevronLeft size={24} />
           </button>
         )}
 
-        <div className="slider-track">
-          {visible.map((p) => {
+        <div className="slider-wrapper">
+          <div 
+            className="slider-track" 
+            ref={sliderRef}
+            style={{
+              transform: `translateX(calc(-${activeIndex * (100 / cardsPerView)}% - ${activeIndex * 35}px))`,
+              transition: 'transform 0.5s ease'
+            }}
+          >
+            {recommendedProducts.map((p) => {
             const hasDiscount =
               p.discountPrice &&
               typeof p.discountPrice === "number" &&
@@ -152,16 +187,16 @@ export default function Recommended() {
               <div
                 key={p.id}
                 className="recommended-card"
-                onClick={() => navigate(`/${p.category}/${p.id}`)}
+                onClick={() => navigate(`/wine/${p.id}`)}
               >
                 <div className="image-wrapper">
-                  <img src={p.imageUrl} alt={p.name} />
+                  <img src={p.imageUrl} alt={p.title || p.name} />
                 </div>
 
-                <div className="rec-name">{p.name}</div>
+                <div className="rec-name">{p.title || p.name}</div>
 
                 <div className="rec-meta">
-                  {p.year} / {p.volume || "0.75 L"} • {p.country || "ФРАНЦИЯ"}
+                  {p.prodDate ? new Date(p.prodDate).getFullYear() : ''} / {p.liter || "0.75"} L • {p.location || ""}
                 </div>
 
                 <div className="price-row">
@@ -169,14 +204,14 @@ export default function Recommended() {
                     {hasDiscount ? (
                       <>
                         <span className="old-price">
-                          {p.price.toLocaleString("ru-RU")} Р
+                          {p.price.toLocaleString("ru-RU")} ₼
                         </span>
                         <span className="discount-price">
-                          {p.discountPrice.toLocaleString("ru-RU")} Р
+                          {p.discountPrice.toLocaleString("ru-RU")} ₼
                         </span>
                       </>
                     ) : (
-                      <span>{p.price.toLocaleString("ru-RU")} Р</span>
+                      <span>{p.price ? p.price.toLocaleString("ru-RU") : "—"} ₼</span>
                     )}
                   </div>
                   <div className="buttons">
@@ -190,19 +225,26 @@ export default function Recommended() {
                     <button
                       className="to-cart"
                       onClick={(e) => handleAddToCart(e, p)}
+                      disabled={cartLoading}
                     >
-                      ADD TO CART
+                      {cartLoading ? "ADDING..." : "ADD TO CART"}
                     </button>
                   </div>
                 </div>
               </div>
             );
           })}
+          </div>
         </div>
 
-        {totalPages > 1 && (
-          <button className="arrow right" onClick={next}>
-            ❯
+        {showArrows && (
+          <button
+            className="arrow arrow-right"
+            onClick={handleNext}
+            disabled={activeIndex >= recommendedProducts.length - cardsPerView}
+            aria-label="Next"
+          >
+            <ChevronRight size={24} />
           </button>
         )}
       </div>

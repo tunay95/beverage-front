@@ -11,6 +11,7 @@ export default function Navbar({ onSearch }) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [dropDown, setDropDown] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [cartCount, setCartCount] = useState(0);
   const [wishlistCount, setWishlistCount] = useState(0);
@@ -69,6 +70,7 @@ export default function Navbar({ onSearch }) {
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
   const toggleDropDown = () => setDropDown(!dropDown);
+  const toggleMobileSearch = () => setMobileSearchOpen(!mobileSearchOpen);
 
   const handleLogout = () => {
     logout(true);
@@ -99,13 +101,16 @@ export default function Navbar({ onSearch }) {
               onChange={handleChange}
             />
             <button className="search-btn">
-              {wishlistCount > 0 && <span className="cart-badge">{wishlistCount}</span>}
               <Search />
             </button>
           </div>
         </div>
 
         <div className="navbar-right">
+          <button className="mobile-search-toggle" onClick={toggleMobileSearch}>
+            <Search />
+          </button>
+
           {isAuthenticated && (
             <Link to="/cart" className="navbar-cart">
               <ShoppingBasket />
@@ -116,6 +121,7 @@ export default function Navbar({ onSearch }) {
           {isAuthenticated && (
             <Link to="/favourite" className="navbar-heart">
               <Heart className="heart-icon" />
+              {wishlistCount > 0 && <span className="wishlist-badge"></span>}
             </Link>
           )}
 
@@ -170,11 +176,32 @@ export default function Navbar({ onSearch }) {
             </div>
           )}
 
-          <div className="burger" onClick={toggleMenu}>
+          {/* <div className="burger" onClick={toggleMenu}>
             <span></span><span></span><span></span>
-          </div>
+          </div> */}
         </div>
       </div>
+
+      {/* Mobile Search Overlay */}
+      {mobileSearchOpen && (
+        <div className="mobile-search-overlay" onClick={toggleMobileSearch}>
+          <div className="mobile-search-container" onClick={(e) => e.stopPropagation()}>
+            <div className="mobile-search-box">
+              <input
+                type="text"
+                placeholder="Search..."
+                className="mobile-search-input"
+                value={query}
+                onChange={handleChange}
+                autoFocus
+              />
+              <button className="mobile-search-btn" onClick={toggleMobileSearch}>
+                <Search />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* <nav className={`navbar-menu ${menuOpen ? "open" : ""}`}>
         <NavLink

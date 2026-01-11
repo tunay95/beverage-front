@@ -3,17 +3,20 @@ import { useParams, useNavigate } from "react-router-dom";
 import "./productInfo.css";
 
 import { getProductDetailed } from "../../data/productApi";
-import { getUserCart, setUserCart } from "../../utils/adminStorage";
+import * as orderApi from "../../data/orderApi";
+import { useAuth } from "../../hooks/useAuth";
 
 export default function ProductInfo() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [totalPrice, setTotalPrice] = useState(0);
   const [message, setMessage] = useState("");
+  const [cartLoading, setCartLoading] = useState(false);
 
   const containerRef = useRef(null);
   const leftRef = useRef(null);
@@ -35,15 +38,6 @@ export default function ProductInfo() {
       fetchProduct();
     }
   }, [id]);
-  const isLoggedIn = !!localStorage.getItem("currentUser");
-
-  const requireLogin = () => {
-    if (!isLoggedIn) {
-      navigate("/auth/login");
-      return false;
-    }
-    return true;
-  };
 
   useEffect(() => {
     if (product && product.price) {
@@ -51,24 +45,54 @@ export default function ProductInfo() {
     }
   }, [quantity, product]);
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!product) return;
-    if (!requireLogin()) return;
-
-    let cart = getUserCart();
-    const existing = cart.find((item) => item.id === product.id);
-
-    if (existing) {
-      existing.quantity += quantity;
-    } else {
-      cart.push({ ...product, quantity });
+    
+    if (!isAuthenticated) {
+      navigate("/auth/login");
+      return;
     }
 
-    setUserCart(cart);
-    window.dispatchEvent(new Event("cartUpdated"));
+    if (cartLoading) return;
 
-    setMessage(`${product.title} added to cart!`);
-    setTimeout(() => setMessage(""), 2000);
+    try {
+      setCartLoading(true);
+      
+      const productId = parseInt(product.id, 10);
+      const qty = parseInt(quantity, 10);
+      
+      console.log("Adding to cart from detail:", {
+        productId,
+        quantity: qty,
+        types: { productId: typeof productId, quantity: typeof qty }
+      });
+      
+      if (!productId || isNaN(productId) || !qty || isNaN(qty)) {
+        throw new Error("Invalid product ID or quantity");
+      }
+
+      await orderApi.addToCart(productId, qty);
+      window.dispatchEvent(new Event("cartUpdated"));
+
+      // Navigate to cart page after adding to cart
+      navigate("/cart");
+    } catch (err) {
+      console.error("Cart error:", err);
+      console.error("Error response:", err.response?.data);
+      if (err.response?.status === 401) {
+        navigate("/auth/login");
+      } else {
+        const errorMsg = err.response?.data?.errors?.['$.productId']?.[0] || 
+                        err.response?.data?.errors?.['$.quantity']?.[0] ||
+                        err.response?.data?.message || 
+                        err.message ||
+                        "Failed to add to cart. Please try again.";
+        setMessage(errorMsg);
+      }
+    } finally {
+      setCartLoading(false);
+      setTimeout(() => setMessage(""), 3000);
+    }
   };
 
   useEffect(() => {
@@ -216,8 +240,12 @@ export default function ProductInfo() {
                     +
                   </button>
                 </div>
-                <button className="buy-btn" onClick={handleAddToCart}>
-                  ADD TO CART
+                <button 
+                  className="buy-btn" 
+                  onClick={handleAddToCart}
+                  disabled={cartLoading}
+                >
+                  {cartLoading ? "ADDING..." : "ADD TO CART"}
                 </button>
               </div>
             </div>

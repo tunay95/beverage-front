@@ -12,7 +12,15 @@ export default function Slider() {
     const fetchSlides = async () => {
       try {
         const data = await getAllSlides();
-        setSlides(data);
+        console.log("Slides data from backend:", data);
+        
+        // Filter only active slides
+        const activeSlides = Array.isArray(data) 
+          ? data.filter(slide => slide.isActive && !slide.isDeleted)
+          : [];
+        
+        console.log("Active slides:", activeSlides);
+        setSlides(activeSlides);
       } catch (error) {
         console.error("Error fetching slides:", error);
       } finally {
@@ -22,6 +30,18 @@ export default function Slider() {
     
     fetchSlides();
   }, []);
+
+  // Auto-play slides
+  useEffect(() => {
+    if (slides.length <= 1) return;
+    
+    const interval = setInterval(() => {
+      setCurrent((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
+    }, 5000); // Change slide every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [slides.length]);
+
   const nextSlide = () =>
     setCurrent((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
   const prevSlide = () =>
@@ -37,23 +57,26 @@ export default function Slider() {
 
   return (
     <div className="slider">
-      {slides.map((slide, index) => (
-        <div
-          key={slide.id}
-          className={`slide ${index === current ? "active" : ""}`}
-        >
+      {slides.map((slide, index) => {
+        const imageUrl = slide.imageUrl || slide.image_url || slide.imageURL || '';
+        return (
           <div
-            className="slide-bg"
-            style={{ backgroundImage: `url(${slide.image_url})` }}
+            key={slide.id}
+            className={`slide ${index === current ? "active" : ""}`}
           >
-            <div className="content-right">
-              <h3>{slide.title}</h3>
-              <h2>{slide.subtitle}</h2>
-              <p className="bottom-text">{slide.description}</p>
+            <div
+              className="slide-bg"
+              style={{ backgroundImage: imageUrl ? `url(${imageUrl})` : 'none' }}
+            >
+              <div className="content-right">
+                <h3>{slide.title}</h3>
+                <h2>{slide.subtitle}</h2>
+                <p className="bottom-text">{slide.description}</p>
+              </div>
             </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
 
       <button className="arrow-btn left" onClick={prevSlide}>
         <MoveLeft />

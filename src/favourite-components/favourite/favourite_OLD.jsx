@@ -10,6 +10,7 @@ export default function Favourite() {
   const [wishlist, setWishlist] = useState([]);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
+  const [cartLoading, setCartLoading] = useState(false);
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
 
@@ -25,7 +26,7 @@ export default function Favourite() {
     try {
       setLoading(true);
       const data = await wishlistApi.getMyWishlist();
-      console.log("Wishlist data:", data);
+      console.log("Wishlist data:", data); // Debug
       setWishlist(data || []);
     } catch (err) {
       console.error("Failed to load wishlist:", err);
@@ -52,38 +53,58 @@ export default function Favourite() {
     }
   };
 
-  const addToCart = async (item) => {
-    if (!isAuthenticated) {
+ const addToCart = async (e, item) => {
+  e.preventDefault();
+
+  if (!isAuthenticated) {
+    navigate("/auth/login");
+    return;
+  }
+
+  if (cartLoading) return;
+
+  // productId-ni “fallback” ilə götür (çünki bəzən item.productId yoxdur)
+  const productId = item.productId ?? item.product?.id;
+
+  if (!productId) {
+    setMessage("ProductId not found in wishlist item. Please reload wishlist.");
+    setTimeout(() => setMessage(""), 3000);
+    return;
+  }
+
+  try {
+    setCartLoading(true);
+
+    await orderApi.addToCart(productId, 1);
+    window.dispatchEvent(new Event("cartUpdated"));
+
+    setMessage(`${item.title} added to cart!`);
+
+    // İSTƏYİRSƏNSƏ: cart-a əlavə edəndən sonra wishlist-dən sil
+    await wishlistApi.removeFromWishlist(item.id);
+    setWishlist((prev) => prev.filter((f) => f.id !== item.id));
+    window.dispatchEvent(new Event("wishlistUpdated"));
+
+    // İSTƏYİRSƏNSƏ: cart səhifəsinə keç
+    navigate("/cart");
+  } catch (err) {
+    console.error("Cart error:", err);
+
+    if (err.response?.status === 401) {
       navigate("/auth/login");
-      return;
+    } else {
+      const errorMsg =
+        err.response?.data?.message ||
+        err.response?.data?.title ||
+        "Failed to add to cart. Please try again.";
+      setMessage(errorMsg);
     }
+  } finally {
+    setCartLoading(false);
+    setTimeout(() => setMessage(""), 2000);
+  }
+};
 
-    if (cartLoading) return;
-
-    try {
-      setCartLoading(true);
-
-      await orderApi.addToCart(item.productId, 1);
-      window.dispatchEvent(new Event("cartUpdated"));
-
-      await wishlistApi.removeFromWishlist(item.id);
-      setWishlist((prev) => prev.filter((f) => f.id !== item.id));
-      window.dispatchEvent(new Event("wishlistUpdated"));
-
-      navigate("/cart");
-    } catch (err) {
-      console.error("Cart error:", err);
-
-      if (err.response?.status === 401) {
-        navigate("/auth/login");
-      } else {
-        setMessage("Failed to add to cart. Please try again.");
-      }
-    } finally {
-      setCartLoading(false);
-      setTimeout(() => setMessage(""), 2000);
-    }
-  };
 
   if (loading) {
     return (
@@ -128,7 +149,7 @@ export default function Favourite() {
                   <img
                     src={item.imageUrl}
                     alt={item.title}
-                    onClick={() => navigate(`/wine/${item.id}`)}
+                    onClick={() => navigate(`/wine/${item.productId}`)}
                     style={{ cursor: "pointer" }}
                   />
 
@@ -169,8 +190,9 @@ export default function Favourite() {
                   <button
                     className="favourite-cart"
                     onClick={() => addToCart(item)}
+                    disabled={cartLoading}
                   >
-                    ADD TO CART
+                    {cartLoading ? "ADDING..." : "ADD TO CART"}
                   </button>
 
                   <button
